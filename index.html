@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PILOT VALUE — パイロット年収比較・就職情報</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            bg:      '#0a0c0f',
+            surface: '#111620',
+            raised:  '#18212f',
+            accent:  '#3d9bff',
+            gold:    '#f5c842',
+            orange:  '#f97316',
+            text:    '#e8edf2',
+            muted:   '#6b7d93',
+          },
+          fontFamily: { sans: ['Inter', 'Noto Sans JP', 'sans-serif'] },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background-color: #0a0c0f;
+      color: #e8edf2;
+      font-family: 'Inter', 'Noto Sans JP', sans-serif;
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Noise ── */
+    body::before {
+      content:'';
+      position:fixed; inset:0;
+      pointer-events:none; z-index:0;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      background-size:128px; opacity:.3;
+    }
+
+    /* ── Nav ── */
+    nav {
+      position:fixed; top:0; left:0; right:0; z-index:200;
+      transition: background 0.4s ease, border-color 0.4s ease;
+    }
+    nav.scrolled {
+      background:rgba(10,12,15,0.92);
+      backdrop-filter:blur(20px);
+      border-bottom:1px solid rgba(255,255,255,0.06);
+    }
+    .nav-link {
+      color:rgba(255,255,255,0.6);
+      font-size:.85rem; font-weight:500;
+      letter-spacing:.04em;
+      transition:color .2s; text-decoration:none;
+    }
+    .nav-link:hover { color:#fff; }
+
+    /* ── Hero ── */
+    #hero-section {
+      position:relative; width:100%; height:100vh;
+      overflow:hidden; background:#000;
+    }
+    #hero-canvas {
+      position:absolute; inset:0; width:100%; height:100%;
+      touch-action:none;
+    }
+    .hero-overlay {
+      position:absolute; inset:0; z-index:10;
+      background:linear-gradient(
+        to bottom,
+        rgba(0,0,0,0.15) 0%,
+        rgba(0,0,0,0.05) 40%,
+        rgba(0,0,0,0.45) 80%,
+        rgba(10,12,15,1) 100%
+      );
+    }
+    .hero-content {
+      position:absolute; inset:0; z-index:20;
+      display:flex; flex-direction:column;
+      align-items:center; justify-content:center;
+      text-align:center; padding:0 24px;
+    }
+
+    /* ── Hero typography ── */
+    .hero-en {
+      font-size: clamp(2.8rem, 7vw, 6.5rem);
+      font-weight: 900;
+      line-height: 1.0;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #ff9b3d 0%, #ffd53d 40%, #fff5c0 65%, #ffa040 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      background-size: 200% 200%;
+      animation: grad-shift 4s ease infinite;
+      text-shadow: none;
+      margin-bottom: 0.2em;
+    }
+    .hero-ja {
+      font-size: clamp(1rem, 2.5vw, 1.5rem);
+      font-weight: 400;
+      color: rgba(255,245,200,0.82);
+      letter-spacing: 0.12em;
+      margin-top: 0.6em;
+    }
+    @keyframes grad-shift {
+      0%   { background-position: 0% 50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* ── fade-in animations ── */
+    .anim-fade-up {
+      opacity:0; transform:translateY(28px);
+      animation: fade-up 0.9s cubic-bezier(.16,1,.3,1) forwards;
+    }
+    @keyframes fade-up {
+      to { opacity:1; transform:translateY(0); }
+    }
+    .delay-1 { animation-delay:.15s; }
+    .delay-2 { animation-delay:.3s; }
+    .delay-3 { animation-delay:.5s; }
+    .delay-4 { animation-delay:.7s; }
+
+    /* ── Glass card ── */
+    .glass {
+      background:rgba(17,22,32,0.7);
+      backdrop-filter:blur(16px);
+      border:1px solid rgba(255,255,255,0.07);
+      border-radius:16px;
+    }
+    .glass-raised {
+      background:rgba(24,33,47,0.85);
+      backdrop-filter:blur(20px);
+      border:1px solid rgba(255,255,255,0.10);
+      border-radius:16px;
+    }
+
+    /* ── Gradient text ── */
+    .gradient-text {
+      background:linear-gradient(135deg, #ffffff 0%, #a8c8f0 60%, #3d9bff 100%);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+      background-clip:text;
+    }
+
+    /* ── Salary bar ── */
+    .salary-bar-track {
+      height:8px; border-radius:999px;
+      background:rgba(255,255,255,0.06); overflow:hidden;
+    }
+    .salary-bar-fill {
+      height:100%; border-radius:999px;
+      transition:width 1.4s cubic-bezier(.16,1,.3,1); width:0;
+    }
+
+    /* ── Table ── */
+    table { width:100%; border-collapse:collapse; }
+    th {
+      font-size:.72rem; font-weight:600;
+      letter-spacing:.08em; text-transform:uppercase;
+      color:#6b7d93; padding:12px 16px; text-align:left;
+      border-bottom:1px solid rgba(255,255,255,0.07);
+    }
+    td {
+      padding:13px 16px; font-size:.875rem;
+      border-bottom:1px solid rgba(255,255,255,0.04);
+      vertical-align:middle;
+    }
+    tr:last-child td { border-bottom:none; }
+    tr:hover td { background:rgba(255,255,255,0.02); }
+
+    /* ── Tag ── */
+    .tag {
+      display:inline-block; padding:3px 10px;
+      border-radius:999px; font-size:.72rem; font-weight:600;
+    }
+    .tag-blue  { background:rgba(61,155,255,.12); color:#5fb0ff; border:1px solid rgba(61,155,255,.2); }
+    .tag-gold  { background:rgba(245,200,66,.10); color:#f5c842; border:1px solid rgba(245,200,66,.2); }
+    .tag-green { background:rgba(52,211,153,.10); color:#34d399; border:1px solid rgba(52,211,153,.2); }
+    .tag-gray  { background:rgba(255,255,255,.06); color:#8899aa; border:1px solid rgba(255,255,255,.1); }
+    .tag-orange{ background:rgba(249,115,22,.12); color:#fb923c; border:1px solid rgba(249,115,22,.2); }
+    .tag-red   { background:rgba(248,113,113,.10); color:#f87171; border:1px solid rgba(248,113,113,.2); }
+
+    /* ── Buttons ── */
+    .btn-primary {
+      display:inline-flex; align-items:center; gap:8px;
+      padding:13px 28px; border-radius:10px;
+      background:#3d9bff; color:#fff;
+      font-size:.9rem; font-weight:600;
+      border:none; cursor:pointer; text-decoration:none;
+      transition:transform .2s cubic-bezier(.16,1,.3,1), box-shadow .2s ease, background .2s ease;
+    }
+    .btn-primary:hover { background:#5eb3ff; transform:translateY(-1px); box-shadow:0 8px 30px rgba(61,155,255,.35); }
+    .btn-primary:active { transform:translateY(0); }
+
+    .btn-ghost {
+      display:inline-flex; align-items:center; gap:8px;
+      padding:13px 28px; border-radius:10px;
+      background:rgba(255,255,255,0.07); color:#e8edf2;
+      font-size:.9rem; font-weight:600;
+      border:1px solid rgba(255,255,255,.12); cursor:pointer; text-decoration:none;
+      transition:background .2s ease, border-color .2s ease;
+    }
+    .btn-ghost:hover { background:rgba(255,255,255,0.12); border-color:rgba(255,255,255,.22); }
+
+    .btn-orange {
+      display:inline-flex; align-items:center; gap:8px;
+      padding:14px 32px; border-radius:999px;
+      background:linear-gradient(135deg,#f97316,#f5c842);
+      color:#000; font-size:1rem; font-weight:700;
+      border:none; cursor:pointer; text-decoration:none;
+      transition:transform .2s cubic-bezier(.16,1,.3,1), box-shadow .2s ease;
+    }
+    .btn-orange:hover { transform:scale(1.04); box-shadow:0 12px 40px rgba(249,115,22,.4); }
+
+    .btn-outline-amber {
+      display:inline-flex; align-items:center; gap:8px;
+      padding:14px 32px; border-radius:999px;
+      background:rgba(249,115,22,.10); color:rgba(255,245,200,.9);
+      font-size:1rem; font-weight:600;
+      border:1px solid rgba(249,115,22,.3); cursor:pointer; text-decoration:none;
+      backdrop-filter:blur(8px);
+      transition:background .2s ease, border-color .2s ease, transform .2s ease;
+    }
+    .btn-outline-amber:hover { background:rgba(249,115,22,.18); border-color:rgba(249,115,22,.5); transform:scale(1.03); }
+
+    /* ── Section fade ── */
+    .fade-up {
+      opacity:0; transform:translateY(24px);
+      transition:opacity .6s ease, transform .6s cubic-bezier(.16,1,.3,1);
+    }
+    .fade-up.visible { opacity:1; transform:translateY(0); }
+
+    /* ── Tab ── */
+    .tab-btn {
+      padding:9px 20px; border-radius:8px; font-size:.82rem; font-weight:600;
+      color:#6b7d93; background:transparent; border:1px solid transparent;
+      cursor:pointer; transition:color .2s, background .2s, border-color .2s; white-space:nowrap;
+    }
+    .tab-btn.active { color:#e8edf2; background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.12); }
+    .tab-btn:hover:not(.active) { color:#c5d5e8; }
+
+    /* ── Job card ── */
+    .job-card {
+      background:rgba(17,22,32,.6);
+      border:1px solid rgba(255,255,255,.07); border-radius:14px; padding:24px;
+      transition:transform .25s cubic-bezier(.16,1,.3,1), border-color .25s ease, box-shadow .25s ease;
+      cursor:pointer; text-decoration:none; display:block;
+    }
+    .job-card:hover {
+      transform:translateY(-3px);
+      border-color:rgba(61,155,255,.30);
+      box-shadow:0 12px 40px rgba(0,0,0,.4), 0 0 0 1px rgba(61,155,255,.12);
+    }
+
+    /* ── Stat card ── */
+    .stat-card {
+      padding:24px; border-radius:14px;
+      background:rgba(17,22,32,.6); border:1px solid rgba(255,255,255,.07);
+    }
+
+    /* ── Timeline ── */
+    .timeline-dot {
+      width:12px; height:12px; border-radius:50%;
+      background:#3d9bff; border:2px solid #0a0c0f;
+      box-shadow:0 0 0 3px rgba(61,155,255,.25); flex-shrink:0;
+    }
+
+    /* ── Ranking badge ── */
+    .rank-1 { background:linear-gradient(135deg,#f5c842,#ffd700); color:#000; }
+    .rank-2 { background:linear-gradient(135deg,#adb5bd,#ced4da); color:#000; }
+    .rank-3 { background:linear-gradient(135deg,#cd7f32,#e8a56a); color:#000; }
+    .rank-n { background:rgba(255,255,255,.08); color:#6b7d93; }
+
+    /* ── Comparison bar ── */
+    .cmp-bar {
+      height:36px; border-radius:8px; display:flex; align-items:center; padding:0 12px;
+      font-size:.8rem; font-weight:700; white-space:nowrap;
+      transition:width 1.4s cubic-bezier(.16,1,.3,1); width:0;
+    }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width:6px; }
+    ::-webkit-scrollbar-track { background:#0a0c0f; }
+    ::-webkit-scrollbar-thumb { background:#18212f; border-radius:3px; }
+    ::-webkit-scrollbar-thumb:hover { background:#26364e; }
+
+    footer { background:#060809; border-top:1px solid rgba(255,255,255,.05); }
+
+    /* Hero badge */
+    .hero-badge-pill {
+      display:inline-flex; align-items:center; gap:8px;
+      padding:7px 18px; border-radius:999px;
+      background:rgba(249,115,22,.10); border:1px solid rgba(249,115,22,.28);
+      font-size:.78rem; font-weight:600; color:rgba(255,200,80,.9);
+      letter-spacing:.06em; text-transform:uppercase;
+      backdrop-filter:blur(8px);
+    }
+
+    /* section badge */
+    .section-badge {
+      display:inline-flex; align-items:center; gap:8px;
+      padding:6px 14px; border-radius:999px;
+      background:rgba(61,155,255,.10); border:1px solid rgba(61,155,255,.25);
+      font-size:.75rem; font-weight:600; color:#3d9bff;
+      letter-spacing:.08em; text-transform:uppercase;
+    }
+
+    /* Logo glow */
+    .logo-img {
+      height: 44px;
+      width: auto;
+      filter: brightness(1.15) drop-shadow(0 0 8px rgba(249,115,22,.5));
+      transition: filter .3s ease;
+    }
+    .logo-img:hover {
+      filter: brightness(1.3) drop-shadow(0 0 14px rgba(249,115,22,.7));
+    }
+
+    /* Stars decoration */
+    @keyframes twinkle { 0%,100%{opacity:.4} 50%{opacity:1} }
+  </style>
+</head>
+
+<body class="relative">
+
+<!-- ════════════════════════════════════
+     NAVIGATION
+════════════════════════════════════ -->
+<nav id="main-nav">
+  <div class="max-w-7xl mx-auto px-6 flex items-center justify-between h-[72px]">
+    <a href="#" class="flex items-center gap-3 flex-shrink-0">
+      <img src="baland_ass/ロゴイメージ.png" alt="PILOT VALUE" class="logo-img" />
+    </a>
+    <div class="hidden md:flex items-center gap-8">
+      <a href="#salary"   class="nav-link">年収比較</a>
+      <a href="#ranking"  class="nav-link">ランキング</a>
+      <a href="#compare"  class="nav-link">日本 vs 海外</a>
+      <a href="#career"   class="nav-link">キャリアパス</a>
+      <a href="#jobs"     class="nav-link">求人情報</a>
+    </div>
+    <div class="flex items-center gap-3">
+      <a href="#" class="nav-link hidden sm:block">ログイン</a>
+      <a href="#jobs" class="btn-primary py-2 px-5 text-sm">無料で始める</a>
+    </div>
+  </div>
+</nav>
+
+
+<!-- ════════════════════════════════════
+     HERO — WebGL Shader Background
+════════════════════════════════════ -->
+<section id="hero-section">
+  <canvas id="hero-canvas"></canvas>
+  <div class="hero-overlay"></div>
+
+  <div class="hero-content">
+    <div class="hero-badge-pill anim-fade-up mb-8">
+      <svg width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4" fill="#f97316"/></svg>
+      2024年 最新データ — 日本 &amp; 海外 主要航空会社
+    </div>
+
+    <h1 class="hero-en anim-fade-up delay-1">PILOT DEFINES</h1>
+    <h1 class="hero-en anim-fade-up delay-2">PILOT'S VALUE</h1>
+
+    <p class="hero-ja anim-fade-up delay-3">パイロットの価値はパイロットが決める</p>
+
+    <div class="flex flex-wrap gap-4 justify-center mt-10 anim-fade-up delay-4">
+      <a href="#salary" class="btn-orange">
+        年収を比較する
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <a href="#ranking" class="btn-outline-amber">ランキングを見る</a>
+    </div>
+
+    <!-- Scroll hint -->
+    <div class="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-40">
+      <div class="text-xs tracking-widest text-white/60">SCROLL</div>
+      <div style="width:1px;height:36px;background:linear-gradient(to bottom,rgba(255,255,255,.6),transparent)"></div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════
+     KEY METRICS
+════════════════════════════════════ -->
+<section class="py-14" style="background:rgba(8,10,14,0.9)">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-5">
+      <div class="stat-card fade-up text-center">
+        <div class="text-3xl font-extrabold gradient-text mb-1">¥5,400万</div>
+        <div class="text-xs text-muted">海外大手 機長 最高年収</div>
+      </div>
+      <div class="stat-card fade-up text-center" style="transition-delay:.1s">
+        <div class="text-3xl font-extrabold gradient-text mb-1">¥2,980万</div>
+        <div class="text-xs text-muted">国内大手 機長 平均年収</div>
+      </div>
+      <div class="stat-card fade-up text-center" style="transition-delay:.2s">
+        <div class="text-3xl font-extrabold gradient-text mb-1">+82%</div>
+        <div class="text-xs text-muted">海外 vs 国内 機長 年収差</div>
+      </div>
+      <div class="stat-card fade-up text-center" style="transition-delay:.3s">
+        <div class="text-3xl font-extrabold gradient-text mb-1">15社+</div>
+        <div class="text-xs text-muted">掲載航空会社（日本 + 海外）</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════
+     SALARY COMPARISON
+════════════════════════════════════ -->
+<section id="salary" class="py-24 relative">
+  <div class="max-w-7xl mx-auto px-6">
+
+    <div class="fade-up mb-10">
+      <div class="section-badge mb-4">年収比較</div>
+      <h2 class="text-4xl font-extrabold tracking-tight gradient-text mb-3">航空会社別 年収データ</h2>
+      <p class="text-muted max-w-2xl">日本・海外の主要航空会社を横断比較。機長・副操縦士それぞれのデータを掲載。</p>
+    </div>
+
+    <!-- Tab buttons -->
+    <div class="flex flex-wrap gap-2 mb-7 fade-up">
+      <button class="tab-btn active" onclick="switchSalaryTab(this,'japan-captain')">🇯🇵 日本 / 機長</button>
+      <button class="tab-btn" onclick="switchSalaryTab(this,'japan-fo')">🇯🇵 日本 / 副操縦士</button>
+      <button class="tab-btn" onclick="switchSalaryTab(this,'overseas-captain')">🌏 海外 / 機長</button>
+      <button class="tab-btn" onclick="switchSalaryTab(this,'overseas-fo')">🌏 海外 / 副操縦士</button>
+    </div>
+
+    <!-- ─ Japan Captain ─ -->
+    <div id="tab-japan-captain" class="glass fade-up overflow-x-auto">
+      <table>
+        <thead>
+          <tr><th>航空会社</th><th>年収レンジ</th><th>平均年収</th><th>基本給</th><th>飛行手当/h</th><th class="hidden lg:table-cell">採用</th><th></th></tr>
+        </thead>
+        <tbody>
+          <tr><td><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold" style="background:rgba(61,155,255,.15);color:#3d9bff">ANA</div><div><div class="font-semibold text-sm">全日本空輸</div><div class="text-xs text-muted">幹線・国際線</div></div></div></td><td><div class="text-sm">¥2,500万〜¥3,500万</div><div class="mt-1 salary-bar-track w-28"><div class="salary-bar-fill" style="background:linear-gradient(90deg,#3d9bff,#5ec4ff)" data-width="96"></div></div></td><td><span class="font-bold text-accent">¥2,980万</span></td><td class="text-muted text-sm">¥1,200万</td><td class="text-muted text-sm">¥8,500</td><td class="hidden lg:table-cell"><span class="tag tag-green">募集中</span></td><td><button class="tag tag-blue">詳細</button></td></tr>
+          <tr><td><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold" style="background:rgba(245,200,66,.15);color:#f5c842">JAL</div><div><div class="font-semibold text-sm">日本航空</div><div class="text-xs text-muted">幹線・国際線</div></div></div></td><td><div class="text-sm">¥2,200万〜¥3,200万</div><div class="mt-1 salary-bar-track w-28"><div class="salary-bar-fill" style="background:linear-gradient(90deg,#f5c842,#ffe380)" data-width="88"></div></div></td><td><span class="font-bold" style="color:#f5c842">¥2,750万</span></td><td class="text-muted text-sm">¥1,100万</td><td class="text-muted text-sm">¥8,200</td><td class="hidden lg:table-cell"><span class="tag tag-green">募集中</span></td><td><button class="tag tag-blue">詳細</button></td></tr>
+          <tr><td><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold" style="background:rgba(52,211,153,.15);color:#34d399">SKY</div><div><div class="font-semibold text-sm">Skymark Airlines</div><div class="text-xs text-muted">国内線専門</div></div></div></td><td><div class="text-sm">¥1,800万〜¥2,500万</div><div class="mt-1 salary-bar-track w-28"><div class="salary-bar-fill" style="background:linear-gradient(90deg,#34d399,#6ee7b7)" data-width="68"></div></div></td><td><span class="font-bold" style="color:#34d399">¥2,100万</span></td><td class="text-muted text-sm">¥900万</td><td class="text-muted text-sm">¥7,500</td><td class="hidden lg:table-cell"><span class="tag tag-green">募集中</span></td><td><button class="tag tag-blue">詳細</button></td></tr>
+          <tr><td><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold" style="background:rgba(167,139,250,.15);color:#a78bfa">ZIP</div><div><div class="font-semibold text-sm">ZIPAIR Tokyo</div><div class="text-xs text-muted">LCC国際線</div></div></div></td><td><div class="text-sm">¥1,600万〜¥2,200万</div><div class="mt-1 salary-bar-track w-28"><div class="salary-bar-fill" style="background:linear-gradient(90deg,#a78bfa,#c4b5fd)" data-width="61"></div></div></td><td><span class="font-bold" style="color:#a78bfa">¥1,900万</span></td><td class="text-muted text-sm">¥850万</td><td class="text-muted text-sm">¥7,000</td><td class="hidden lg:table-cell"><span class="tag tag-green">募集中</span></td><td><button class="tag tag-blue">詳細</button></td></tr>
+          <tr><td><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold" style="background:rgba(244,114,182,.15);color:#f472b6">PCH</div><div><div class="font-semibold text-sm">Peach Aviation</div><div class="text-xs text-muted">LCC国内・国際</div></div></div></td><td><div class="text-sm">¥1,500万〜¥2,000万</div><div class="mt-1 salary-bar-track w-28"><div class="salary-bar-fill" style="background:linear-gradient(90deg,#f472b6,#f9a8d4)" data-width="56"></div></div></td><td><span class="font-bold" style="color:#f472b6">¥1,750万</span></td><td class="text-muted text-sm">¥800万</td><td class="text-muted text-sm">¥6,800</td><td class="hidden lg:table-cell"><span class="tag tag-gold">検討中</span></td><td><button class="tag tag-blue">詳細</button></td></tr>
+          <tr><td><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold" style="background:rgba(251,146,60,.15);color:#fb923c">JJP</div><div><div class="font-semibold text-sm">Jetstar Japan</div><div class="text-xs text-muted">LCC国内線</div></div></div></td><td><div class="text-sm">¥1,400万〜¥2,000万</div><div class="mt-1 salary-bar-track w-28"><div class="salary-bar-fill" style="background:linear-gradient(90deg,#fb923c,#fdba74)" data-width="54"></div></div></td><td><span class="font-bold" style="color:#fb923c">¥1,680万</span></td><td class="text-muted text-sm">¥780万</td><td class="text-muted text-sm">¥6,500</td><td class="hidden lg:table-cell"><span class="tag tag-gray">締切</span></td><td><button class="tag tag-blue">詳細</button></td></tr>
+          <tr><td><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold" style="background:rgba(248,113,113,.15);color:#f87171">SPJ</div><div><div class="font-semibold text-sm">Spring Japan</div><div class="text-xs text-muted">LCC国際線</div></div></div></td><td><div class="text-sm">¥1,300万〜¥1,800万</div><div class="mt-1 salary-bar-track w-28"><div class="salary-bar-fill" style="background:linear-gradient(90deg,#f87171,#fca5a5)" data-width="48"></div></div></td><td><span class="font-bold" style="color:#f87171">¥1,550万</span></td><td class="text-muted text-sm">¥720万</td><td class="text-muted text-sm">¥6,200</td><td class="hidden lg:table-cell"><span class="tag tag-green">募集中</span></td><td><button class="tag tag-blue">詳細</button></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ─ Japan F/O ─ -->
+    <div id="tab-japan-fo" class="glass fade-up overflow-x-auto hidden">
+      <table>
+        <thead><tr><th>航空会社</th><th>年収レンジ</th><th>平均年収</th><th>基本給</th><th>飛行手当/h</th><th class="hidden lg:table-cell">採用</th><th></th></tr></thead>
+        <tbody>
+          <tr><td><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold" style="background:rgba(61,155,255,.15);color:#3d9bff">ANA</div><div><div class="font-semibold text-sm">全日本空輸</div></div></div></td><td><div class="text-sm">¥1,000万〜¥1,800万</div><div class="mt-1 salary-bar-track w-28"><div class="salary-bar-fill" style="background:linear-gradient(90deg,#3d9bff,#5ec4ff)" data-width="92"></div></div></td><td><span class="font-bold text-accent">¥1,420万</span></td><td class="text-muted text-sm">¥620万</td><td class="text-muted text-sm">¥5,500</td><td class="hidden lg:table-cell"><span class="tag tag-green">募集中</span></td><td><button class="tag tag-blue">詳細</button></td></tr>
+          <tr><td><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold" style="background:rgba(245,200,66,.15);color:#f5c842">JAL</div><div><div class="font-semibold text-sm">日本航空</div></div></div></td><td><div class="text-sm">¥900万〜¥1,700万</div><div class="mt-1 salary-bar-track w-28"><div class="salary-bar-fill" style="background:linear-gradient(90deg,#f5c842,#ffe380)" data-width="85"></div></div></td><td><span class="font-bold" style="color:#f5c842">¥1,350万</span></td><td class="text-muted text-sm">¥600万</td><td class="text-muted text-sm">¥5,300</td><td class="hidden lg:table-cell"><span class="tag tag-green">募集中</span></td><td><button class="tag tag-blue">詳細</button></td></tr>
+          <tr><td><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold" style="background:rgba(52,211,153,.15);color:#34d399">SKY</div><div><div class="font-semibold text-sm">Skymark Airlines</div></div></div></td><td><div class="text-sm">¥700万〜¥1,200万</div><div class="mt-1 salary-bar-track w-28"><div class="salary-bar-fill" style="background:linear-gradient(90deg,#34d399,#6ee7b7)" data-width="60"></div></div></td><td><span class="font-bold" style="color:#34d399">¥950万</span></td><td class="text-muted text-sm">¥480万</td><td class="text-muted text-sm">¥4,800</td><td class="hidden lg:table-cell"><span class="tag tag-green">募集中</span></td><td><button class="tag tag-blue">詳細</button></td></tr>
+          <tr><td><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold" style="background:rgba(244,114,182,.15);color:#f472b6">PCH</div><div><div class="font-semibold text-sm">Peach Aviation</div></div></div></td><td><div class="text-sm">¥600万〜¥1,000万</div><div class="mt-1 salary-bar-track w-28"><div class="salary-bar-fill" style="background:linear-gradient(90deg,#f472b6,#f9a8d4)" data-width="50"></div></div></td><td><span class="font-bold" style="color:#f472b6">¥800万</span></td><td class="text-muted text-sm">¥420万</td><td class="text-muted text-sm">¥4,500</td><td class="hidden lg:table-cell"><span class="tag tag-gold">検討中</span></td><td><button class="tag tag-blue">詳細</button></td></tr>
+          <tr><td><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold" style="background:rgba(251,146,60,.15);color:#fb923c">JJP</div><div><div class="font-semibold text-sm">Jetstar Japan</div></div></div></td><td><div class="text-sm">¥550万〜¥950万</div><div class="mt-1 salary-bar-track w-28"><div class="salary-bar-fill" style="background:linear-gradient(90deg,#fb923c,#fdba74)" data-width="47"></div></div></td><td><span class="font-bold" style="color:#fb923c">¥750万</span></td><td class="text-muted text-sm">¥400万</td><td class="text-muted text-sm">¥4,300</td><td class="hidden lg:table-cell"><span class="tag tag-gray">締切</span></td><td><button class="tag tag-blue">詳細</button></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ─ Overseas Captain ─ -->
+    <div id="tab-overseas-captain" class="glass fade-up overflow-x-auto hidden">
+      <table>
+        <thead><tr><th>航空会社</th><th>国/地域</th><th>年収レンジ（USD換算）</th><th>平均年収（JPY）</th><th>特記</th><th></th></tr></thead>
+        <tbody>
+          <tr><td><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold" style="background:rgba(249,115,22,.15);color:#fb923c">DAL</div><div><div class="font-semibold text-sm">Delta Air Lines</div><div class="text-xs text-muted">米国最大手キャリア</div></div></div></td><td><span class="tag tag-orange">🇺🇸 USA</span></td><td class="text-sm">$320,000〜$400,000</td><td><span class="font-bold" style="color:#fb923c">¥5,400万</span></td><td><span class="tag tag-blue">業界最高水準</span></td><td><button class="tag tag-blue">詳細</button></td></tr>
+          <tr><td><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold" style="background:rgba(61,155,255,.15);color:#3d9bff">UAL</div><div><div class="font-semibold text-sm">United Airlines</div><div class="text-xs text-muted">米国大手キャリア</div></div></div></td><td><span class="tag tag-orange">🇺🇸 USA</span></td><td class="text-sm">$310,000〜$390,000</td><td><span class="font-bold text-accent">¥5,250万</span></td><td><span class="tag tag-blue">高水準</span></td><td><button class="tag tag-blue">詳細</button></td></tr>
+          <tr><td><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold" style="background:rgba(248,113,113,.15);color:#f87171">AAL</div><div><div class="font-semibold text-sm">American Airlines</div><div class="text-xs text-muted">米国大手キャリア</div></div></div></td><td><span class="tag tag-orange">🇺🇸 USA</span></td><td class="text-sm">$300,000〜$370,000</td><td><span class="font-bold" style="color:#f87171">¥5,025万</span></td><td><span class="tag tag-blue">高水準</span></td><td><button class="tag tag-blue">詳細</button></td></tr>
+          <tr><td><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold" style="background:rgba(52,211,153,.15);color:#34d399">SWA</div><div><div class="font-semibold text-sm">Southwest Airlines</div><div class="text-xs text-muted">米国LCC最大手</div></div></div></td><td><span class="tag tag-orange">🇺🇸 USA</span></td><td class="text-sm">$270,000〜$350,000</td><td><span class="font-bold" style="color:#34d399">¥4,725万</span></td><td><span class="tag tag-gray">国内線主体</span></td><td><button class="tag tag-blue">詳細</button></td></tr>
+          <tr><td><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold" style="background:rgba(245,200,66,.15);color:#f5c842">EK</div><div><div class="font-semibold text-sm">Emirates</div><div class="text-xs text-muted">中東最大手キャリア</div></div></div></td><td><span class="tag tag-gold">🇦🇪 UAE</span></td><td class="text-sm">$280,000〜$350,000</td><td><span class="font-bold" style="color:#f5c842">¥4,500万</span></td><td><span class="tag tag-green">非課税</span></td><td><button class="tag tag-blue">詳細</button></td></tr>
+          <tr><td><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold" style="background:rgba(167,139,250,.15);color:#a78bfa">SIA</div><div><div class="font-semibold text-sm">Singapore Airlines</div><div class="text-xs text-muted">アジア最高評価</div></div></div></td><td><span class="tag tag-blue">🇸🇬 SIN</span></td><td class="text-sm">$250,000〜$320,000</td><td><span class="font-bold" style="color:#a78bfa">¥4,050万</span></td><td><span class="tag tag-gray">高優遇</span></td><td><button class="tag tag-blue">詳細</button></td></tr>
+          <tr><td><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold" style="background:rgba(244,114,182,.15);color:#f472b6">QR</div><div><div class="font-semibold text-sm">Qatar Airways</div><div class="text-xs text-muted">中東大手キャリア</div></div></div></td><td><span class="tag tag-gold">🇶🇦 QAT</span></td><td class="text-sm">$220,000〜$300,000</td><td><span class="font-bold" style="color:#f472b6">¥3,900万</span></td><td><span class="tag tag-green">非課税</span></td><td><button class="tag tag-blue">詳細</button></td></tr>
+          <tr><td><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold" style="background:rgba(251,146,60,.15);color:#fb923c">EY</div><div><div class="font-semibold text-sm">Etihad Airways</div><div class="text-xs text-muted">アブダビ国営</div></div></div></td><td><span class="tag tag-gold">🇦🇪 UAE</span></td><td class="text-sm">$200,000〜$280,000</td><td><span class="font-bold" style="color:#fb923c">¥3,600万</span></td><td><span class="tag tag-green">非課税</span></td><td><button class="tag tag-blue">詳細</button></td></tr>
+          <tr><td><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold" style="background:rgba(61,155,255,.15);color:#3d9bff">CX</div><div><div class="font-semibold text-sm">Cathay Pacific</div><div class="text-xs text-muted">香港フラッグキャリア</div></div></div></td><td><span class="tag tag-blue">🇭🇰 HKG</span></td><td class="text-sm">$200,000〜$280,000</td><td><span class="font-bold text-accent">¥3,600万</span></td><td><span class="tag tag-gray">高コスト立地</span></td><td><button class="tag tag-blue">詳細</button></td></tr>
+          <tr><td><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold" style="background:rgba(52,211,153,.15);color:#34d399">LH</div><div><div class="font-semibold text-sm">Lufthansa</div><div class="text-xs text-muted">欧州大手キャリア</div></div></div></td><td><span class="tag tag-green">🇩🇪 EUR</span></td><td class="text-sm">$190,000〜$270,000</td><td><span class="font-bold" style="color:#34d399">¥3,300万</span></td><td><span class="tag tag-gray">欧州最高水準</span></td><td><button class="tag tag-blue">詳細</button></td></tr>
+        </tbody>
+      </table>
+      <div class="px-4 py-3 border-t border-white/[0.05]">
+        <p class="text-xs text-muted">※ JPY換算はUSD/JPY=150で計算。非課税国の実質手取りは大幅に増加。各社の給与は機材・経験年数・契約形態により異なります。</p>
+      </div>
+    </div>
+
+    <!-- ─ Overseas F/O ─ -->
+    <div id="tab-overseas-fo" class="glass fade-up overflow-x-auto hidden">
+      <table>
+        <thead><tr><th>航空会社</th><th>国/地域</th><th>年収レンジ（USD換算）</th><th>平均年収（JPY）</th><th>特記</th><th></th></tr></thead>
+        <tbody>
+          <tr><td><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold" style="background:rgba(249,115,22,.15);color:#fb923c">DAL</div><div><div class="font-semibold text-sm">Delta Air Lines</div></div></div></td><td><span class="tag tag-orange">🇺🇸 USA</span></td><td class="text-sm">$130,000〜$200,000</td><td><span class="font-bold" style="color:#fb923c">¥2,500万</span></td><td><span class="tag tag-blue">高水準</span></td><td><button class="tag tag-blue">詳細</button></td></tr>
+          <tr><td><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold" style="background:rgba(245,200,66,.15);color:#f5c842">EK</div><div><div class="font-semibold text-sm">Emirates</div></div></div></td><td><span class="tag tag-gold">🇦🇪 UAE</span></td><td class="text-sm">$120,000〜$180,000</td><td><span class="font-bold" style="color:#f5c842">¥2,250万</span></td><td><span class="tag tag-green">非課税</span></td><td><button class="tag tag-blue">詳細</button></td></tr>
+          <tr><td><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold" style="background:rgba(167,139,250,.15);color:#a78bfa">SIA</div><div><div class="font-semibold text-sm">Singapore Airlines</div></div></div></td><td><span class="tag tag-blue">🇸🇬 SIN</span></td><td class="text-sm">$110,000〜$170,000</td><td><span class="font-bold" style="color:#a78bfa">¥2,025万</span></td><td><span class="tag tag-gray">高優遇</span></td><td><button class="tag tag-blue">詳細</button></td></tr>
+          <tr><td><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold" style="background:rgba(244,114,182,.15);color:#f472b6">QR</div><div><div class="font-semibold text-sm">Qatar Airways</div></div></div></td><td><span class="tag tag-gold">🇶🇦 QAT</span></td><td class="text-sm">$100,000〜$160,000</td><td><span class="font-bold" style="color:#f472b6">¥1,800万</span></td><td><span class="tag tag-green">非課税</span></td><td><button class="tag tag-blue">詳細</button></td></tr>
+          <tr><td><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold" style="background:rgba(61,155,255,.15);color:#3d9bff">UAL</div><div><div class="font-semibold text-sm">United Airlines</div></div></div></td><td><span class="tag tag-orange">🇺🇸 USA</span></td><td class="text-sm">$120,000〜$190,000</td><td><span class="font-bold text-accent">¥2,325万</span></td><td><span class="tag tag-blue">高水準</span></td><td><button class="tag tag-blue">詳細</button></td></tr>
+        </tbody>
+      </table>
+      <div class="px-4 py-3 border-t border-white/[0.05]">
+        <p class="text-xs text-muted">※ JPY換算はUSD/JPY=150で計算。</p>
+      </div>
+    </div>
+
+    <p class="text-xs text-muted mt-4 fade-up">※データは独自調査・公開情報による推定値です。実際の報酬は各社採用ページをご確認ください。</p>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════
+     RANKING
+════════════════════════════════════ -->
+<section id="ranking" class="py-24 border-t border-white/[0.05]" style="background:rgba(8,10,14,.6)">
+  <div class="max-w-5xl mx-auto px-6">
+
+    <div class="fade-up mb-10">
+      <div class="section-badge mb-4">年収ランキング</div>
+      <h2 class="text-4xl font-extrabold tracking-tight gradient-text mb-3">世界 パイロット年収ランキング</h2>
+      <p class="text-muted">機長（Captain）の平均年収順位。日本 + 海外を一括比較。</p>
+    </div>
+
+    <div class="space-y-3 fade-up" id="ranking-list">
+      <!-- populated by JS -->
+    </div>
+
+    <p class="text-xs text-muted mt-5 fade-up">※ 海外はUSD/JPY=150換算。非課税国はグロス年収での比較。</p>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════
+     JAPAN vs OVERSEAS COMPARISON
+════════════════════════════════════ -->
+<section id="compare" class="py-24 relative">
+  <div class="max-w-7xl mx-auto px-6">
+
+    <div class="fade-up mb-12">
+      <div class="section-badge mb-4">日本 vs 海外</div>
+      <h2 class="text-4xl font-extrabold tracking-tight gradient-text mb-3">日本 vs 海外 年収比較</h2>
+      <p class="text-muted max-w-2xl">機長の平均年収を軸に、日本大手と海外主要キャリアを可視化。差は最大1.8倍。</p>
+    </div>
+
+    <div class="grid lg:grid-cols-2 gap-10 items-start">
+
+      <!-- Left: Comparison chart -->
+      <div class="glass p-6 fade-up">
+        <div class="text-xs text-muted font-semibold tracking-widest uppercase mb-6">機長 平均年収（JPY換算）</div>
+        <div class="space-y-4" id="compare-bars">
+          <!-- built by JS -->
+        </div>
+      </div>
+
+      <!-- Right: Summary cards -->
+      <div class="space-y-5 fade-up" style="transition-delay:.15s">
+
+        <div class="glass-raised p-6">
+          <div class="flex items-start gap-4">
+            <div class="text-3xl">🇯🇵</div>
+            <div class="flex-1">
+              <div class="font-bold text-lg mb-1">日本の大手キャリア</div>
+              <div class="text-muted text-sm mb-3">ANA / JAL（機長 平均）</div>
+              <div class="text-4xl font-extrabold text-accent mb-2">¥2,865万</div>
+              <div class="salary-bar-track"><div class="salary-bar-fill" style="background:linear-gradient(90deg,#3d9bff,#5ec4ff)" data-width="53"></div></div>
+              <div class="mt-3 text-xs text-muted leading-relaxed">福利厚生・年金・退職金が充実。生活コストを加味すると実質的な購買力は高い。日本語環境で家族と安定したキャリアを構築できる。</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass-raised p-6" style="border-color:rgba(245,200,66,.2)">
+          <div class="flex items-start gap-4">
+            <div class="text-3xl">🌏</div>
+            <div class="flex-1">
+              <div class="font-bold text-lg mb-1">海外大手キャリア（USA）</div>
+              <div class="text-muted text-sm mb-3">Delta / United（機長 平均）</div>
+              <div class="text-4xl font-extrabold mb-2" style="color:#f5c842">¥5,325万</div>
+              <div class="salary-bar-track"><div class="salary-bar-fill" style="background:linear-gradient(90deg,#f5c842,#ffe380)" data-width="98"></div></div>
+              <div class="mt-3 text-xs text-muted leading-relaxed">米国大手は業界最高水準。生活費・税金を差し引いても実質的な可処分所得は高い。英語力・移住への意志が必要だが、挑戦する価値は大きい。</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass-raised p-6" style="border-color:rgba(52,211,153,.2)">
+          <div class="flex items-start gap-4">
+            <div class="text-3xl">🇦🇪</div>
+            <div class="flex-1">
+              <div class="font-bold text-lg mb-1">中東大手キャリア（非課税）</div>
+              <div class="text-muted text-sm mb-3">Emirates / Qatar（機長 平均）</div>
+              <div class="text-4xl font-extrabold mb-2" style="color:#34d399">¥4,200万</div>
+              <div class="salary-bar-track"><div class="salary-bar-fill" style="background:linear-gradient(90deg,#34d399,#6ee7b7)" data-width="78"></div></div>
+              <div class="mt-3 text-xs text-muted leading-relaxed">税金が0円のため、手取りベースでは米国と同等かそれ以上。住宅・学費補助も充実。日本のパイロットが最も転職しやすい海外キャリア。</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass p-5 flex items-center gap-4" style="border-color:rgba(249,115,22,.15)">
+          <div class="text-2xl">💡</div>
+          <div class="text-sm text-muted">
+            <span class="font-semibold text-white">実質手取り試算：</span>
+            中東（非課税・住宅付）での機長年収は、日本の2倍以上の実質生活水準に相当するケースもある。
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════
+     CAREER PATH
+════════════════════════════════════ -->
+<section id="career" class="py-24 border-t border-white/[0.05]">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="grid lg:grid-cols-2 gap-16 items-start">
+
+      <!-- Timeline -->
+      <div class="fade-up">
+        <div class="section-badge mb-4">キャリアパス</div>
+        <h2 class="text-4xl font-extrabold tracking-tight gradient-text mb-3">パイロットになるまでの道</h2>
+        <p class="text-muted mb-10">自社養成・私費留学・航大・防衛省出身、複数のルートを解説。</p>
+
+        <div class="relative flex gap-6">
+          <div class="flex flex-col items-center pt-1">
+            <div style="width:2px;flex:1;min-height:520px;background:linear-gradient(to bottom,#3d9bff,rgba(61,155,255,.1));border-radius:2px"></div>
+          </div>
+          <div class="flex-1 space-y-10">
+            <div class="relative"><div class="absolute -left-8 top-1 timeline-dot"></div><div class="glass p-5"><div class="flex items-center gap-2 mb-2"><span class="tag tag-blue">STEP 01</span><span class="text-xs text-muted">〜大学卒業</span></div><div class="font-bold mb-1">自社養成 / 私費留学 / 航空大学校</div><div class="text-sm text-muted">大手2社（ANA/JAL）は自社養成枠あり。倍率は数百倍。私費留学・航大ルートも大手への道。</div></div></div>
+            <div class="relative"><div class="absolute -left-8 top-1 timeline-dot"></div><div class="glass p-5"><div class="flex items-center gap-2 mb-2"><span class="tag tag-blue">STEP 02</span><span class="text-xs text-muted">入社〜3年</span></div><div class="font-bold mb-1">訓練・副操縦士（F/O）就任</div><div class="text-sm text-muted">地上学科・シミュレーター・実地訓練を経てラインチェック合格。年収 ¥700万〜¥1,200万程度。</div></div></div>
+            <div class="relative"><div class="absolute -left-8 top-1 timeline-dot"></div><div class="glass p-5"><div class="flex items-center gap-2 mb-2"><span class="tag tag-gold">STEP 03</span><span class="text-xs text-muted">入社〜10年</span></div><div class="font-bold mb-1">副操縦士 経験積み上げ</div><div class="text-sm text-muted">機材移行・路線拡大でフライト時間を蓄積。昇格審査への準備。年収 ¥1,000万〜¥1,800万。</div></div></div>
+            <div class="relative"><div class="absolute -left-8 top-1 timeline-dot" style="background:#f5c842;box-shadow:0 0 0 3px rgba(245,200,66,.25)"></div><div class="glass p-5" style="border-color:rgba(245,200,66,.2)"><div class="flex items-center gap-2 mb-2"><span class="tag tag-gold">STEP 04</span><span class="text-xs text-muted">入社10年〜</span></div><div class="font-bold mb-1">機長（Captain）昇格</div><div class="text-sm text-muted">キャプテンチェック合格後、機長として運航を担う。年収 ¥1,500万〜¥3,500万（日本）。海外を目指せばさらに高い水準も。</div></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Routes -->
+      <div class="space-y-5 fade-up" style="transition-delay:.15s">
+        <div class="section-badge mb-4">取得ルート比較</div>
+        <h2 class="text-4xl font-extrabold tracking-tight gradient-text mb-6">ライセンス取得ルート</h2>
+
+        <div class="glass p-6"><div class="flex items-start justify-between mb-3"><div><div class="font-bold">自社養成</div><div class="text-xs text-muted mt-0.5">ANA / JAL 独自プログラム</div></div><span class="tag tag-green">おすすめ</span></div><div class="grid grid-cols-3 gap-4 text-center"><div class="stat-card py-3 px-2"><div class="text-lg font-bold text-accent">¥0</div><div class="text-xs text-muted mt-0.5">自己負担</div></div><div class="stat-card py-3 px-2"><div class="text-lg font-bold text-accent">3〜4年</div><div class="text-xs text-muted mt-0.5">訓練期間</div></div><div class="stat-card py-3 px-2"><div class="text-lg font-bold text-accent">数百倍</div><div class="text-xs text-muted mt-0.5">競争倍率</div></div></div></div>
+
+        <div class="glass p-6"><div class="flex items-start justify-between mb-3"><div><div class="font-bold">私費留学（海外フライトスクール）</div><div class="text-xs text-muted mt-0.5">米国・EU・フィリピン等</div></div><span class="tag tag-blue">自由度高</span></div><div class="grid grid-cols-3 gap-4 text-center"><div class="stat-card py-3 px-2"><div class="text-lg font-bold" style="color:#f5c842">¥1,500万+</div><div class="text-xs text-muted mt-0.5">自己負担</div></div><div class="stat-card py-3 px-2"><div class="text-lg font-bold" style="color:#f5c842">1.5〜3年</div><div class="text-xs text-muted mt-0.5">訓練期間</div></div><div class="stat-card py-3 px-2"><div class="text-lg font-bold" style="color:#f5c842">LCC中心</div><div class="text-xs text-muted mt-0.5">採用先</div></div></div></div>
+
+        <div class="glass p-6"><div class="flex items-start justify-between mb-3"><div><div class="font-bold">航空大学校</div><div class="text-xs text-muted mt-0.5">国土交通省所管の国立校</div></div><span class="tag tag-gold">安定</span></div><div class="grid grid-cols-3 gap-4 text-center"><div class="stat-card py-3 px-2"><div class="text-lg font-bold" style="color:#34d399">〜¥200万</div><div class="text-xs text-muted mt-0.5">自己負担</div></div><div class="stat-card py-3 px-2"><div class="text-lg font-bold" style="color:#34d399">2年</div><div class="text-xs text-muted mt-0.5">訓練期間</div></div><div class="stat-card py-3 px-2"><div class="text-lg font-bold" style="color:#34d399">全社</div><div class="text-xs text-muted mt-0.5">採用先</div></div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════
+     JOBS
+════════════════════════════════════ -->
+<section id="jobs" class="py-24 border-t border-white/[0.05]" style="background:rgba(8,10,14,.5)">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="fade-up mb-10">
+      <div class="section-badge mb-4">求人情報</div>
+      <h2 class="text-4xl font-extrabold tracking-tight gradient-text mb-3">現在募集中の求人</h2>
+      <p class="text-muted">日本・海外各社の最新採用情報。見逃しゼロへ。</p>
+    </div>
+    <div class="flex flex-wrap gap-2 mb-8 fade-up">
+      <button class="tab-btn active">すべて</button>
+      <button class="tab-btn">機長</button>
+      <button class="tab-btn">副操縦士</button>
+      <button class="tab-btn">大手キャリア</button>
+      <button class="tab-btn">LCC</button>
+      <button class="tab-btn">海外</button>
+    </div>
+    <div class="grid md:grid-cols-2 xl:grid-cols-3 gap-5">
+      <div class="job-card fade-up"><div class="flex items-start justify-between mb-4"><div class="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm" style="background:rgba(61,155,255,.15);color:#3d9bff">ANA</div><span class="tag tag-green">NEW</span></div><div class="font-bold text-base mb-1">機長（Captain）— B787/B777</div><div class="text-sm text-muted mb-4">全日本空輸株式会社</div><div class="flex flex-wrap gap-2 mb-4"><span class="tag tag-blue">国際線</span><span class="tag tag-gold">正社員</span></div><div class="border-t border-white/[0.06] pt-4 flex items-center justify-between"><div><div class="text-xs text-muted">年収</div><div class="font-bold text-accent">¥2,500万〜¥3,500万</div></div><a href="#" class="btn-primary text-sm py-2 px-4">応募する</a></div></div>
+      <div class="job-card fade-up" style="transition-delay:.07s"><div class="flex items-start justify-between mb-4"><div class="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm" style="background:rgba(245,200,66,.15);color:#f5c842">JAL</div><span class="tag tag-green">NEW</span></div><div class="font-bold text-base mb-1">副操縦士（F/O）— A350</div><div class="text-sm text-muted mb-4">日本航空株式会社</div><div class="flex flex-wrap gap-2 mb-4"><span class="tag tag-blue">国際線</span><span class="tag tag-gold">正社員</span></div><div class="border-t border-white/[0.06] pt-4 flex items-center justify-between"><div><div class="text-xs text-muted">年収</div><div class="font-bold" style="color:#f5c842">¥1,100万〜¥1,700万</div></div><a href="#" class="btn-primary text-sm py-2 px-4">応募する</a></div></div>
+      <div class="job-card fade-up" style="transition-delay:.14s"><div class="flex items-start justify-between mb-4"><div class="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm" style="background:rgba(249,115,22,.15);color:#fb923c">EK</div><span class="tag tag-orange">海外</span></div><div class="font-bold text-base mb-1">機長（Captain）— B777/A380</div><div class="text-sm text-muted mb-4">Emirates Airlines</div><div class="flex flex-wrap gap-2 mb-4"><span class="tag tag-blue">国際線</span><span class="tag tag-green">非課税</span><span class="tag tag-gold">正社員</span></div><div class="border-t border-white/[0.06] pt-4 flex items-center justify-between"><div><div class="text-xs text-muted">年収</div><div class="font-bold" style="color:#fb923c">¥3,900万〜¥4,500万</div></div><a href="#" class="btn-primary text-sm py-2 px-4">応募する</a></div></div>
+      <div class="job-card fade-up" style="transition-delay:.21s"><div class="flex items-start justify-between mb-4"><div class="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm" style="background:rgba(52,211,153,.15);color:#34d399">SKY</div><span class="tag tag-green">募集中</span></div><div class="font-bold text-base mb-1">機長（Captain）— B737</div><div class="text-sm text-muted mb-4">スカイマーク株式会社</div><div class="flex flex-wrap gap-2 mb-4"><span class="tag tag-gray">国内線</span><span class="tag tag-gold">正社員</span></div><div class="border-t border-white/[0.06] pt-4 flex items-center justify-between"><div><div class="text-xs text-muted">年収</div><div class="font-bold" style="color:#34d399">¥1,800万〜¥2,500万</div></div><a href="#" class="btn-primary text-sm py-2 px-4">応募する</a></div></div>
+      <div class="job-card fade-up" style="transition-delay:.28s"><div class="flex items-start justify-between mb-4"><div class="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm" style="background:rgba(244,114,182,.15);color:#f472b6">QR</div><span class="tag tag-orange">海外</span></div><div class="font-bold text-base mb-1">副操縦士（F/O）— A380</div><div class="text-sm text-muted mb-4">Qatar Airways</div><div class="flex flex-wrap gap-2 mb-4"><span class="tag tag-blue">国際線</span><span class="tag tag-green">非課税</span><span class="tag tag-gold">正社員</span></div><div class="border-t border-white/[0.06] pt-4 flex items-center justify-between"><div><div class="text-xs text-muted">年収</div><div class="font-bold" style="color:#f472b6">¥1,800万〜¥2,700万</div></div><a href="#" class="btn-primary text-sm py-2 px-4">応募する</a></div></div>
+      <div class="job-card fade-up" style="transition-delay:.35s"><div class="flex items-start justify-between mb-4"><div class="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm" style="background:rgba(167,139,250,.15);color:#a78bfa">ZIP</div><span class="tag tag-green">募集中</span></div><div class="font-bold text-base mb-1">機長（Captain）— B787</div><div class="text-sm text-muted mb-4">ZIPAIR Tokyo株式会社</div><div class="flex flex-wrap gap-2 mb-4"><span class="tag tag-blue">国際線</span><span class="tag tag-blue">LCC</span><span class="tag tag-gold">正社員</span></div><div class="border-t border-white/[0.06] pt-4 flex items-center justify-between"><div><div class="text-xs text-muted">年収</div><div class="font-bold" style="color:#a78bfa">¥1,600万〜¥2,200万</div></div><a href="#" class="btn-primary text-sm py-2 px-4">応募する</a></div></div>
+    </div>
+    <div class="text-center mt-10 fade-up">
+      <a href="#" class="btn-ghost">求人をすべて見る（32件）</a>
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════
+     CTA
+════════════════════════════════════ -->
+<section class="py-24 relative overflow-hidden">
+  <div class="absolute inset-0" style="background:radial-gradient(ellipse 60% 50% at 50% 50%,rgba(249,115,22,.06) 0%,transparent 70%)"></div>
+  <div class="relative max-w-4xl mx-auto px-6 text-center fade-up">
+    <img src="baland_ass/ロゴイメージ.png" alt="PILOT VALUE" class="h-12 w-auto mx-auto mb-8 opacity-90" style="filter:brightness(1.1) drop-shadow(0 0 12px rgba(249,115,22,.4))"/>
+    <h2 class="text-4xl lg:text-5xl font-extrabold tracking-tight gradient-text mb-5">パイロットの価値を、正しく届ける。</h2>
+    <p class="text-lg text-muted leading-relaxed mb-10 max-w-2xl mx-auto">PILOT VALUEは、パイロットが正当な報酬と機会を得られる世界を目指す、年収比較・就職情報プラットフォームです。</p>
+    <div class="flex flex-wrap justify-center gap-4">
+      <a href="#salary" class="btn-orange">年収比較を始める <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      <a href="#jobs" class="btn-ghost">求人を探す</a>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════
+     FOOTER
+════════════════════════════════════ -->
+<footer class="py-12">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="grid md:grid-cols-4 gap-10 mb-10">
+      <div><img src="baland_ass/ロゴイメージ.png" alt="PILOT VALUE" class="h-7 w-auto mb-4 opacity-80"/><p class="text-xs text-muted leading-relaxed">日本 & 海外 パイロットの年収・就職情報を一括比較。正確なデータでキャリア選択をサポート。</p></div>
+      <div><div class="text-xs font-semibold text-muted uppercase tracking-widest mb-4">サービス</div><ul class="space-y-2 text-sm text-muted"><li><a href="#salary" class="hover:text-text transition-colors">年収比較</a></li><li><a href="#ranking" class="hover:text-text transition-colors">ランキング</a></li><li><a href="#compare" class="hover:text-text transition-colors">日本 vs 海外</a></li><li><a href="#career" class="hover:text-text transition-colors">キャリアパス</a></li><li><a href="#jobs" class="hover:text-text transition-colors">求人情報</a></li></ul></div>
+      <div><div class="text-xs font-semibold text-muted uppercase tracking-widest mb-4">情報</div><ul class="space-y-2 text-sm text-muted"><li><a href="#" class="hover:text-text transition-colors">サービスについて</a></li><li><a href="#" class="hover:text-text transition-colors">データの信頼性</a></li><li><a href="#" class="hover:text-text transition-colors">よくある質問</a></li><li><a href="#" class="hover:text-text transition-colors">お問い合わせ</a></li></ul></div>
+      <div><div class="text-xs font-semibold text-muted uppercase tracking-widest mb-4">法的情報</div><ul class="space-y-2 text-sm text-muted"><li><a href="#" class="hover:text-text transition-colors">プライバシーポリシー</a></li><li><a href="#" class="hover:text-text transition-colors">利用規約</a></li><li><a href="#" class="hover:text-text transition-colors">免責事項</a></li></ul></div>
+    </div>
+    <div class="border-t border-white/[0.05] pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="text-xs text-muted">© 2024 PILOT VALUE. All rights reserved.</div>
+      <div class="text-xs text-muted">掲載データは参考値です。実際の情報は各社採用ページをご確認ください。</div>
+    </div>
+  </div>
+</footer>
+
+
+<!-- ════════════════════════════════════
+     SCRIPTS
+════════════════════════════════════ -->
+<script>
+// ── WebGL Shader Hero ──────────────────────────────────────────
+(function() {
+  const canvas = document.getElementById('hero-canvas');
+  const gl = canvas.getContext('webgl2');
+  if (!gl) return;
+
+  const vertSrc = `#version 300 es
+precision highp float;
+in vec4 position;
+void main(){ gl_Position = position; }`;
+
+  const fragSrc = `#version 300 es
+precision highp float;
+out vec4 O;
+uniform vec2 resolution;
+uniform float time;
+uniform vec2 move;
+uniform vec2 touch;
+uniform int pointerCount;
+uniform vec2 pointers;
+#define FC gl_FragCoord.xy
+#define T time
+#define R resolution
+#define MN min(R.x,R.y)
+float rnd(vec2 p){p=fract(p*vec2(12.9898,78.233));p+=dot(p,p+34.56);return fract(p.x*p.y);}
+float noise(in vec2 p){vec2 i=floor(p),f=fract(p),u=f*f*(3.-2.*f);float a=rnd(i),b=rnd(i+vec2(1,0)),c=rnd(i+vec2(0,1)),d=rnd(i+1.);return mix(mix(a,b,u.x),mix(c,d,u.x),u.y);}
+float fbm(vec2 p){float t=.0,a=1.;mat2 m=mat2(1.,-.5,.2,1.2);for(int i=0;i<5;i++){t+=a*noise(p);p*=2.*m;a*=.5;}return t;}
+float clouds(vec2 p){float d=1.,t=.0;for(float i=.0;i<3.;i++){float a=d*fbm(i*10.+p.x*.2+.2*(1.+i)*p.y+d+i*i+p);t=mix(t,d,a);d=a;p*=2./(i+1.);}return t;}
+void main(void){
+  vec2 uv=(FC-.5*R)/MN, st=uv*vec2(2,1);
+  vec3 col=vec3(0);
+  float bg=clouds(vec2(st.x+T*.5,-st.y));
+  uv*=1.-.3*(sin(T*.2)*.5+.5);
+  for(float i=1.;i<12.;i++){
+    uv+=.1*cos(i*vec2(.1+.01*i,.8)+i*i+T*.5+.1*uv.x);
+    vec2 p=uv;
+    float d=length(p);
+    col+=.00125/d*(cos(sin(i)*vec3(1,2,3))+1.);
+    float b=noise(i+p+bg*1.731);
+    col+=.002*b/length(max(p,vec2(b*p.x*.02,p.y)));
+    col=mix(col,vec3(bg*.25,bg*.137,bg*.05),d);
+  }
+  O=vec4(col,1);
+}`;
+
+  function createShader(type, src) {
+    const s = gl.createShader(type);
+    gl.shaderSource(s, src);
+    gl.compileShader(s);
+    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) console.error(gl.getShaderInfoLog(s));
+    return s;
+  }
+
+  const vs = createShader(gl.VERTEX_SHADER, vertSrc);
+  const fs = createShader(gl.FRAGMENT_SHADER, fragSrc);
+  const prog = gl.createProgram();
+  gl.attachShader(prog, vs); gl.attachShader(prog, fs);
+  gl.linkProgram(prog);
+
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,1,-1,-1,1,1,1,-1]), gl.STATIC_DRAW);
+  const pos = gl.getAttribLocation(prog, 'position');
+  gl.enableVertexAttribArray(pos);
+  gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
+
+  const uRes   = gl.getUniformLocation(prog, 'resolution');
+  const uTime  = gl.getUniformLocation(prog, 'time');
+  const uMove  = gl.getUniformLocation(prog, 'move');
+  const uTouch = gl.getUniformLocation(prog, 'touch');
+  const uPC    = gl.getUniformLocation(prog, 'pointerCount');
+  const uPtrs  = gl.getUniformLocation(prog, 'pointers');
+
+  let mouseX = 0, mouseY = 0, mvX = 0, mvY = 0;
+
+  canvas.addEventListener('mousemove', e => {
+    mvX += e.movementX; mvY += e.movementY;
+    mouseX = e.clientX; mouseY = canvas.height - e.clientY;
+  });
+
+  function resize() {
+    const dpr = Math.max(1, 0.5 * window.devicePixelRatio);
+    canvas.width  = window.innerWidth  * dpr;
+    canvas.height = window.innerHeight * dpr;
+    gl.viewport(0, 0, canvas.width, canvas.height);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  function loop(now) {
+    gl.useProgram(prog);
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.uniform2f(uRes,   canvas.width, canvas.height);
+    gl.uniform1f(uTime,  now * 1e-3);
+    gl.uniform2f(uMove,  mvX, mvY);
+    gl.uniform2f(uTouch, mouseX, mouseY);
+    gl.uniform1i(uPC,    0);
+    gl.uniform2fv(uPtrs, [0, 0]);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    mvX *= 0.9; mvY *= 0.9;
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+})();
+
+// ── Nav scroll style ─────────────────────────────────────────
+window.addEventListener('scroll', () => {
+  document.getElementById('main-nav').classList.toggle('scrolled', window.scrollY > 40);
+}, { passive: true });
+
+// ── Salary tab switcher ───────────────────────────────────────
+const salaryTabs = ['japan-captain','japan-fo','overseas-captain','overseas-fo'];
+function switchSalaryTab(btn, id) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  salaryTabs.forEach(t => {
+    const el = document.getElementById('tab-' + t);
+    if (el) el.classList.toggle('hidden', t !== id);
+  });
+  const active = document.getElementById('tab-' + id);
+  if (active) animateBars(active);
+}
+
+// ── Animate salary bars ───────────────────────────────────────
+function animateBars(container) {
+  container.querySelectorAll('.salary-bar-fill').forEach(bar => {
+    bar.style.width = '0';
+    setTimeout(() => { bar.style.width = (bar.dataset.width || 0) + '%'; }, 80);
+  });
+}
+
+// ── Ranking list ──────────────────────────────────────────────
+const rankingData = [
+  { name:'Delta Air Lines',      flag:'🇺🇸', type:'USA大手', avg:'¥5,400万', usd:'~$360K', color:'#fb923c', pct:100 },
+  { name:'United Airlines',      flag:'🇺🇸', type:'USA大手', avg:'¥5,250万', usd:'~$350K', color:'#3d9bff', pct:97 },
+  { name:'American Airlines',    flag:'🇺🇸', type:'USA大手', avg:'¥5,025万', usd:'~$335K', color:'#f87171', pct:93 },
+  { name:'Southwest Airlines',   flag:'🇺🇸', type:'USA LCC',  avg:'¥4,725万', usd:'~$315K', color:'#fb923c', pct:87 },
+  { name:'Emirates',             flag:'🇦🇪', type:'中東大手', avg:'¥4,500万', usd:'~$300K', color:'#f5c842', pct:83 },
+  { name:'Singapore Airlines',   flag:'🇸🇬', type:'アジア大手', avg:'¥4,050万', usd:'~$270K', color:'#a78bfa', pct:75 },
+  { name:'Qatar Airways',        flag:'🇶🇦', type:'中東大手', avg:'¥3,900万', usd:'~$260K', color:'#f472b6', pct:72 },
+  { name:'Etihad Airways',       flag:'🇦🇪', type:'中東大手', avg:'¥3,600万', usd:'~$240K', color:'#34d399', pct:67 },
+  { name:'Cathay Pacific',       flag:'🇭🇰', type:'アジア大手', avg:'¥3,600万', usd:'~$240K', color:'#5ec4ff', pct:67 },
+  { name:'Lufthansa',            flag:'🇩🇪', type:'欧州大手', avg:'¥3,300万', usd:'~$220K', color:'#34d399', pct:61 },
+  { name:'全日本空輸 (ANA)',      flag:'🇯🇵', type:'日本大手', avg:'¥2,980万', usd:'—', color:'#3d9bff', pct:55 },
+  { name:'日本航空 (JAL)',        flag:'🇯🇵', type:'日本大手', avg:'¥2,750万', usd:'—', color:'#f5c842', pct:51 },
+  { name:'Skymark Airlines',     flag:'🇯🇵', type:'日本中堅', avg:'¥2,100万', usd:'—', color:'#34d399', pct:39 },
+  { name:'ZIPAIR Tokyo',         flag:'🇯🇵', type:'日本LCC', avg:'¥1,900万', usd:'—', color:'#a78bfa', pct:35 },
+  { name:'Peach Aviation',       flag:'🇯🇵', type:'日本LCC', avg:'¥1,750万', usd:'—', color:'#f472b6', pct:32 },
+];
+
+const rankBadge = (i) => {
+  if(i===0) return `<div class="w-8 h-8 rounded-full rank-1 flex items-center justify-center text-sm font-black flex-shrink-0">1</div>`;
+  if(i===1) return `<div class="w-8 h-8 rounded-full rank-2 flex items-center justify-center text-sm font-black flex-shrink-0">2</div>`;
+  if(i===2) return `<div class="w-8 h-8 rounded-full rank-3 flex items-center justify-center text-sm font-black flex-shrink-0">3</div>`;
+  return `<div class="w-8 h-8 rounded-full rank-n flex items-center justify-center text-sm font-semibold flex-shrink-0">${i+1}</div>`;
+};
+
+const rl = document.getElementById('ranking-list');
+rankingData.forEach((d, i) => {
+  const row = document.createElement('div');
+  row.className = 'glass p-4 fade-up';
+  row.style.transitionDelay = (i * 0.04) + 's';
+  row.innerHTML = `
+    <div class="flex items-center gap-4">
+      ${rankBadge(i)}
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-2 mb-1.5 flex-wrap">
+          <span class="font-semibold text-sm">${d.flag} ${d.name}</span>
+          <span class="tag tag-gray text-xs">${d.type}</span>
+          ${d.usd !== '—' ? '<span class="tag tag-green text-xs">海外</span>' : '<span class="tag tag-blue text-xs">🇯🇵 日本</span>'}
+        </div>
+        <div class="salary-bar-track w-full">
+          <div class="salary-bar-fill" style="background:linear-gradient(90deg,${d.color},${d.color}88)" data-width="${d.pct}"></div>
+        </div>
+      </div>
+      <div class="text-right flex-shrink-0">
+        <div class="font-bold text-sm" style="color:${d.color}">${d.avg}</div>
+        ${d.usd !== '—' ? `<div class="text-xs text-muted">${d.usd}</div>` : ''}
+      </div>
+    </div>`;
+  rl.appendChild(row);
+});
+
+// ── Compare bars ──────────────────────────────────────────────
+const compareData = [
+  { name:'Delta (🇺🇸)',    avg:'¥5,400万', color:'#fb923c', pct:98 },
+  { name:'Emirates (🇦🇪)', avg:'¥4,500万', color:'#f5c842', pct:82 },
+  { name:'Qatar (🇶🇦)',    avg:'¥3,900万', color:'#f472b6', pct:71 },
+  { name:'ANA (🇯🇵)',      avg:'¥2,980万', color:'#3d9bff', pct:54 },
+  { name:'JAL (🇯🇵)',      avg:'¥2,750万', color:'#5ec4ff', pct:50 },
+  { name:'Skymark (🇯🇵)',  avg:'¥2,100万', color:'#34d399', pct:38 },
+  { name:'Peach (🇯🇵)',    avg:'¥1,750万', color:'#f472b6', pct:32 },
+];
+
+const cb = document.getElementById('compare-bars');
+compareData.forEach(d => {
+  const row = document.createElement('div');
+  row.innerHTML = `
+    <div class="flex items-center gap-3 text-sm">
+      <div class="w-28 text-right text-muted text-xs flex-shrink-0">${d.name}</div>
+      <div class="flex-1 salary-bar-track h-9 relative">
+        <div class="salary-bar-fill h-full" style="background:linear-gradient(90deg,${d.color}aa,${d.color})" data-width="${d.pct}"></div>
+      </div>
+      <div class="w-20 font-bold text-xs flex-shrink-0" style="color:${d.color}">${d.avg}</div>
+    </div>`;
+  cb.appendChild(row);
+});
+
+// ── IntersectionObserver for fade-up + bars ───────────────────
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      animateBars(e.target);
+      io.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.01, rootMargin: '0px 0px -30px 0px' });
+
+document.querySelectorAll('.fade-up').forEach(el => io.observe(el));
+
+// Trigger all after short delay
+setTimeout(() => {
+  document.querySelectorAll('.fade-up:not(.visible)').forEach(el => {
+    el.classList.add('visible');
+    animateBars(el);
+  });
+}, 300);
+</script>
+
+</body>
+</html>
