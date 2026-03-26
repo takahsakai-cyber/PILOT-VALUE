@@ -192,7 +192,7 @@
     '[data-theme=light] .pv-si mark{background:rgba(160,114,0,.14);color:#92690a}',
     '.pv-search-empty{padding:16px 14px;font-size:.8rem;color:#6b7d93;text-align:center}',
     /* mobile */
-    '@media(max-width:640px){#pv-search-box{width:200px}#pv-search-dd{width:calc(100vw - 24px);right:-12px}}',
+    '@media(max-width:640px){#pv-search-box{width:160px}#pv-search-dd{width:calc(100vw - 24px);right:-12px}}',
   ].join('');
   document.head.appendChild(style);
 
@@ -316,4 +316,101 @@
   } else {
     buildUI();
   }
+})();
+
+/* ═══════════════════════════════════════════════════
+   PILOT VALUE — Hamburger / Mobile Drawer
+   ═══════════════════════════════════════════════════ */
+(function(){
+  var P = location.pathname.indexOf('/airlines/') >= 0 ? '../' : '';
+
+  function inject() {
+    if (document.getElementById('pv-ham-btn')) return;
+    var nav = document.getElementById('main-nav');
+    if (!nav) return;
+
+    var s = document.createElement('style');
+    s.textContent = [
+      '.pv-ham-btn{display:none;flex-direction:column;justify-content:center;align-items:center;width:38px;height:38px;gap:5px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:10px;cursor:pointer;transition:background .2s;flex-shrink:0;padding:0}',
+      '.pv-ham-btn:hover{background:rgba(255,255,255,.13)}',
+      '[data-theme=light] .pv-ham-btn{background:rgba(0,0,0,.06);border-color:rgba(0,0,0,.12)}',
+      '[data-theme=light] .pv-ham-btn:hover{background:rgba(0,0,0,.11)}',
+      '.pv-ham-line{width:18px;height:1.8px;border-radius:1px;background:rgba(255,255,255,.75);transition:transform .3s,opacity .3s;display:block}',
+      '[data-theme=light] .pv-ham-line{background:rgba(15,23,42,.7)}',
+      '.pv-ham-btn.open .pv-ham-line:nth-child(1){transform:translateY(6.8px) rotate(45deg)}',
+      '.pv-ham-btn.open .pv-ham-line:nth-child(2){opacity:0;transform:scaleX(0)}',
+      '.pv-ham-btn.open .pv-ham-line:nth-child(3){transform:translateY(-6.8px) rotate(-45deg)}',
+      '#pv-nav-overlay{position:fixed;inset:0;z-index:190;background:rgba(0,0,0,.55);opacity:0;pointer-events:none;transition:opacity .3s}',
+      '#pv-nav-overlay.open{opacity:1;pointer-events:all}',
+      '#pv-nav-drawer{position:fixed;top:0;right:0;bottom:0;z-index:195;width:270px;max-width:82vw;background:#0d1117;border-left:1px solid rgba(255,255,255,.08);transform:translateX(100%);transition:transform .35s cubic-bezier(.16,1,.3,1);overflow-y:auto}',
+      '[data-theme=light] #pv-nav-drawer{background:#f4f6f9;border-left-color:rgba(0,0,0,.09)}',
+      '#pv-nav-drawer.open{transform:translateX(0)}',
+      '.pv-nd-head{display:flex;align-items:center;justify-content:space-between;height:72px;padding:0 20px;border-bottom:1px solid rgba(255,255,255,.07)}',
+      '[data-theme=light] .pv-nd-head{border-bottom-color:rgba(0,0,0,.08)}',
+      '.pv-nd-logo{height:30px;width:auto}',
+      '.pv-nd-close{width:34px;height:34px;border-radius:8px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.6);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .2s;flex-shrink:0}',
+      '[data-theme=light] .pv-nd-close{background:rgba(0,0,0,.06);border-color:rgba(0,0,0,.1);color:rgba(15,23,42,.6)}',
+      '.pv-nd-close:hover{background:rgba(255,255,255,.13)}',
+      '.pv-nd-links{padding:8px 0}',
+      '.pv-nd-link{display:flex;align-items:center;padding:15px 24px;font-size:.95rem;font-weight:600;color:rgba(255,255,255,.75);text-decoration:none;border-bottom:1px solid rgba(255,255,255,.05);transition:background .15s,color .15s}',
+      '[data-theme=light] .pv-nd-link{color:rgba(15,23,42,.75);border-bottom-color:rgba(0,0,0,.06)}',
+      '.pv-nd-link:hover{background:rgba(255,255,255,.05);color:#fff}',
+      '[data-theme=light] .pv-nd-link:hover{background:rgba(0,0,0,.04);color:#0f172a}',
+      '.pv-nd-login{display:block;margin:16px 20px;padding:13px;border-radius:10px;text-align:center;font-size:.9rem;font-weight:700;text-decoration:none;background:linear-gradient(135deg,rgba(249,115,22,.1),rgba(245,200,66,.1));border:1px solid rgba(245,200,66,.28);color:#f5c842;transition:background .2s}',
+      '[data-theme=light] .pv-nd-login{color:#a07200;border-color:rgba(160,114,0,.28);background:rgba(160,114,0,.07)}',
+      '.pv-nd-login:hover{background:linear-gradient(135deg,rgba(249,115,22,.2),rgba(245,200,66,.2))}',
+      '@media(max-width:767px){.pv-ham-btn{display:flex}}',
+      '@media(min-width:768px){#pv-nav-drawer,#pv-nav-overlay{display:none!important}}',
+    ].join('');
+    document.head.appendChild(s);
+
+    var overlay = document.createElement('div');
+    overlay.id = 'pv-nav-overlay';
+    document.body.appendChild(overlay);
+
+    var drawer = document.createElement('div');
+    drawer.id = 'pv-nav-drawer';
+    drawer.innerHTML =
+      '<div class="pv-nd-head">' +
+        '<a href="' + P + 'index.html"><img src="' + P + 'baland_ass/\u30ed\u30b4\u30a4\u30e1\u30fc\u30b8.png" alt="PILOT VALUE" class="pv-nd-logo"/></a>' +
+        '<button class="pv-nd-close" id="pv-nd-close-btn" aria-label="\u9589\u3058\u308b">' +
+          '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>' +
+        '</button>' +
+      '</div>' +
+      '<div class="pv-nd-links">' +
+        '<a href="' + P + 'world-airlines.html" class="pv-nd-link">\u4e16\u754c\u306e\u822a\u7a7a\u4f1a\u793e</a>' +
+        '<a href="' + P + 'index.html#compare" class="pv-nd-link">\u65e5\u672c vs \u6d77\u5916</a>' +
+        '<a href="' + P + 'index.html#ranking" class="pv-nd-link">\u5e74\u53ce\u30e9\u30f3\u30ad\u30f3\u30b0</a>' +
+        '<a href="' + P + 'index.html#jobs" class="pv-nd-link">\u6c42\u4eba\u60c5\u5831</a>' +
+        '<a href="' + P + 'community.html" class="pv-nd-link">\u30b3\u30df\u30e5\u30cb\u30c6\u30a3</a>' +
+      '</div>' +
+      '<a href="' + P + 'login.html" class="pv-nd-login" id="pv-nd-login-lnk">\u30ed\u30b0\u30a4\u30f3</a>';
+    document.body.appendChild(drawer);
+
+    var btn = document.createElement('button');
+    btn.className = 'pv-ham-btn';
+    btn.id = 'pv-ham-btn';
+    btn.setAttribute('aria-label', '\u30e1\u30cb\u30e5\u30fc');
+    btn.innerHTML = '<span class="pv-ham-line"></span><span class="pv-ham-line"></span><span class="pv-ham-line"></span>';
+
+    var rights = nav.querySelectorAll('.flex.items-center');
+    var right = rights[rights.length - 1];
+    if (right) right.appendChild(btn);
+
+    function openD() { drawer.classList.add('open'); overlay.classList.add('open'); btn.classList.add('open'); document.body.style.overflow = 'hidden'; }
+    function closeD() { drawer.classList.remove('open'); overlay.classList.remove('open'); btn.classList.remove('open'); document.body.style.overflow = ''; }
+
+    btn.addEventListener('click', function(){ drawer.classList.contains('open') ? closeD() : openD(); });
+    overlay.addEventListener('click', closeD);
+    document.getElementById('pv-nd-close-btn').addEventListener('click', closeD);
+    drawer.querySelectorAll('.pv-nd-link').forEach(function(a){ a.addEventListener('click', closeD); });
+
+    try {
+      var u = JSON.parse(localStorage.getItem('pv_user') || 'null');
+      var lnk = document.getElementById('pv-nd-login-lnk');
+      if (u && u.name && lnk) { lnk.textContent = u.name.replace(/[\s\u3000].*/, ''); lnk.href = P + 'profile.html'; }
+    } catch(e) {}
+  }
+
+  if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', inject); } else { inject(); }
 })();
