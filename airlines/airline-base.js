@@ -751,8 +751,7 @@ document.addEventListener('DOMContentLoaded', function() {
       '.pv-nd-login{display:block;margin:16px 20px;padding:13px;border-radius:10px;text-align:center;font-size:.9rem;font-weight:700;text-decoration:none;background:linear-gradient(135deg,rgba(249,115,22,.1),rgba(245,200,66,.1));border:1px solid rgba(245,200,66,.28);color:#f5c842;transition:background .2s}',
       '[data-theme=light] .pv-nd-login{color:#a07200;border-color:rgba(160,114,0,.28);background:rgba(160,114,0,.07)}',
       '.pv-nd-login:hover{background:linear-gradient(135deg,rgba(249,115,22,.2),rgba(245,200,66,.2))}',
-      '@media(max-width:767px){.pv-ham-btn{display:flex}}',
-      '@media(min-width:768px){#pv-nav-drawer,#pv-nav-overlay{display:none!important}}',
+      '.pv-ham-btn{display:flex}',
     ].join('');
     document.head.appendChild(s);
 
