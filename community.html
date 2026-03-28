@@ -866,9 +866,9 @@
       <div style="font-size:3.5rem;margin-bottom:16px">🎉</div>
       <div class="text-xl font-bold mb-2">投稿ありがとうございます！</div>
       <p class="text-muted text-sm mb-8">口コミが承認されました。全データへのアクセスが<br><strong class="text-text">1ヶ月間</strong>解放されました。</p>
-      <button onclick="closeModal();unlockAccess();" class="btn-orange justify-center px-8 py-3">
-        すべての口コミを見る →
-      </button>
+      <a id="btn-go-airline" href="world-airlines.html" class="btn-orange justify-center px-8 py-3" style="display:inline-flex;text-decoration:none">
+        投稿した口コミを確認する →
+      </a>
     </div>
 
   </div>
@@ -1225,6 +1225,9 @@ async function submitModal() {
   } catch(e) { console.warn('Supabase save failed:', e); }
 
   showStep('success');
+  // 投稿した航空会社の口コミページへのリンクをセット
+  const goBtn = document.getElementById('btn-go-airline');
+  if (goBtn && airlineVal) goBtn.href = `airlines/${airlineVal}.html#reviews`;
   renderReviews(currentFilter);
   document.getElementById('gate-panel').style.display = 'none';
   document.getElementById('unlock-badge').classList.remove('hidden');
