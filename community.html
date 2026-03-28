@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <script>(function(){var t=localStorage.getItem('pv-theme')||'dark';document.documentElement.setAttribute('data-theme',t);}());</script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>パイロット 口コミ・転職コミュニティ | PILOT VALUE</title>
+  <title>パイロット 口コミ 最新一覧 — 全航空会社 | PILOT VALUE</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -308,13 +308,13 @@
     <div class="relative max-w-3xl mx-auto">
       <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold mb-6 fade-up" style="background:rgba(245,200,66,.1);color:#f5c842;border:1px solid rgba(245,200,66,.2)">
         <svg width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4" fill="#f5c842"/></svg>
-        パイロット専用コミュニティ
+        口コミ 最新フィード
       </div>
       <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 fade-up" style="transition-delay:.05s">
-        リアルな年収・職場環境を<br>パイロット同士でシェア
+        全航空会社のパイロット口コミ<br>最新フィード
       </h1>
       <p class="text-muted text-base leading-relaxed max-w-xl mx-auto mb-8 fade-up" style="transition-delay:.1s">
-        ANA・JAL・Emirates・Deltaなど各社の現役・元パイロットによる口コミ。<br>
+        ANA・JAL・Emirates・Deltaなど世界100社以上の現役・元パイロットによるリアルな口コミ。<br>
         <strong class="text-text">1件投稿すれば、全データを1ヶ月間閲覧できます。</strong>
       </p>
       <div class="flex flex-wrap justify-center gap-3 fade-up" style="transition-delay:.15s">
@@ -400,7 +400,7 @@
   <div class="max-w-4xl mx-auto">
 
     <div class="flex items-center justify-between mb-6 fade-up">
-      <h2 class="text-xl font-bold">口コミ一覧</h2>
+      <h2 class="text-xl font-bold">最新の口コミ <span id="feed-count" class="text-sm font-normal text-muted ml-2"></span></h2>
       <span id="unlock-badge" class="text-xs text-muted hidden-when-locked">
         <span class="privacy-badge">🔓 1ヶ月アクセス有効</span>
       </span>
@@ -409,12 +409,19 @@
     <!-- Filter chips -->
     <div class="flex flex-wrap gap-2 mb-6 fade-up" style="transition-delay:.05s">
       <button class="filter-chip active" onclick="filterReviews(this,'all')">すべて</button>
-      <button class="filter-chip" onclick="filterReviews(this,'ana')" style="--c:#3d9bff">ANA</button>
-      <button class="filter-chip" onclick="filterReviews(this,'jal')" style="--c:#e8192c">JAL</button>
+      <button class="filter-chip" onclick="filterReviews(this,'ana')">ANA</button>
+      <button class="filter-chip" onclick="filterReviews(this,'jal')">JAL</button>
+      <button class="filter-chip" onclick="filterReviews(this,'skymark')">Skymark</button>
+      <button class="filter-chip" onclick="filterReviews(this,'peach')">Peach</button>
       <button class="filter-chip" onclick="filterReviews(this,'delta')">Delta</button>
+      <button class="filter-chip" onclick="filterReviews(this,'united')">United</button>
+      <button class="filter-chip" onclick="filterReviews(this,'southwest')">Southwest</button>
       <button class="filter-chip" onclick="filterReviews(this,'emirates')">Emirates</button>
       <button class="filter-chip" onclick="filterReviews(this,'qatar')">Qatar</button>
-      <button class="filter-chip" onclick="filterReviews(this,'united')">United</button>
+      <button class="filter-chip" onclick="filterReviews(this,'etihad')">Etihad</button>
+      <button class="filter-chip" onclick="filterReviews(this,'singapore')">Singapore</button>
+      <button class="filter-chip" onclick="filterReviews(this,'cathay')">Cathay</button>
+      <button class="filter-chip" onclick="filterReviews(this,'lufthansa')">Lufthansa</button>
     </div>
 
     <!-- Gate wrapper: blurs bottom rows if not unlocked -->
@@ -443,138 +450,6 @@
 </section>
 
 
-<!-- POST FORM (legacy – hidden, replaced by modal) -->
-<section id="post" class="py-20 px-6 border-t border-white/[0.05]" style="display:none">
-  <div class="max-w-2xl mx-auto">
-
-    <div class="fade-up mb-8">
-      <div class="flex items-center gap-3 mb-3">
-        <div class="w-9 h-9 rounded-xl flex items-center justify-center font-bold" style="background:linear-gradient(135deg,#f97316,#f5c842);color:#000;font-size:1rem">✍</div>
-        <h2 class="text-2xl font-bold">口コミを投稿する</h2>
-      </div>
-      <p class="text-sm text-muted ml-12">投稿内容は個人が特定されないよう編集・表示されます。投稿後、すべてのデータへのアクセスが1ヶ月間解放されます。</p>
-    </div>
-
-    <div class="glass p-8 fade-up" style="transition-delay:.08s">
-
-      <div id="form-success" class="hidden text-center py-8">
-        <div class="text-5xl mb-4">🎉</div>
-        <div class="text-xl font-bold mb-2">投稿ありがとうございます！</div>
-        <p class="text-muted text-sm mb-6">口コミが承認されました。全データへのアクセスが1ヶ月間解放されました。</p>
-        <button onclick="unlockAccess()" class="btn-orange">すべての口コミを見る
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
-      </div>
-
-      <form id="review-form" onsubmit="submitReview(event)">
-
-        <!-- Row 1: Airline + Position -->
-        <div class="grid sm:grid-cols-2 gap-4 mb-5">
-          <div>
-            <label class="form-label">航空会社</label>
-            <select class="form-input" id="f-airline" required>
-              <option value="">選択してください</option>
-              <option value="ana">ANA（全日本空輸）</option>
-              <option value="jal">JAL（日本航空）</option>
-              <option value="skymark">Skymark Airlines</option>
-              <option value="zipair">ZIPAIR Tokyo</option>
-              <option value="peach">Peach Aviation</option>
-              <option value="jetstar">Jetstar Japan</option>
-              <option value="spring">Spring Japan</option>
-              <option value="delta">Delta Air Lines</option>
-              <option value="united">United Airlines</option>
-              <option value="american">American Airlines</option>
-              <option value="southwest">Southwest Airlines</option>
-              <option value="emirates">Emirates</option>
-              <option value="qatar">Qatar Airways</option>
-              <option value="etihad">Etihad Airways</option>
-              <option value="singapore">Singapore Airlines</option>
-              <option value="cathay">Cathay Pacific</option>
-              <option value="lufthansa">Lufthansa</option>
-              <option value="other">その他</option>
-            </select>
-          </div>
-          <div>
-            <label class="form-label">職位</label>
-            <select class="form-input" id="f-position" required>
-              <option value="">選択してください</option>
-              <option value="captain">機長（Captain）</option>
-              <option value="fo">副操縦士（First Officer）</option>
-              <option value="cadet">訓練生（Cadet）</option>
-              <option value="former">元乗務員</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Row 2: Salary + Experience -->
-        <div class="grid sm:grid-cols-2 gap-4 mb-5">
-          <div>
-            <label class="form-label">年収（万円・概算）</label>
-            <input type="number" class="form-input" id="f-salary" placeholder="例: 2800" min="500" max="15000" required />
-            <div class="text-xs text-muted mt-1.5">※ 100万円単位での概算で構いません（例：2800）</div>
-          </div>
-          <div>
-            <label class="form-label">経験年数（おおよそ）</label>
-            <select class="form-input" id="f-experience">
-              <option value="">選択してください</option>
-              <option value="1-3">1〜3年</option>
-              <option value="4-7">4〜7年</option>
-              <option value="8-15">8〜15年</option>
-              <option value="16+">16年以上</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Rating -->
-        <div class="mb-5">
-          <label class="form-label">総合評価</label>
-          <div class="flex gap-3 mt-1">
-            <label class="flex items-center gap-2 cursor-pointer text-sm">
-              <input type="radio" name="rating" value="5" class="accent-yellow-400" required /> <span style="color:#f5c842">★★★★★</span> 5 — 非常に良い
-            </label>
-            <label class="flex items-center gap-2 cursor-pointer text-sm">
-              <input type="radio" name="rating" value="4" /> <span style="color:#f5c842">★★★★</span>☆ 4
-            </label>
-            <label class="flex items-center gap-2 cursor-pointer text-sm">
-              <input type="radio" name="rating" value="3" /> <span style="color:#f5c842">★★★</span>☆☆ 3
-            </label>
-            <label class="flex items-center gap-2 cursor-pointer text-sm">
-              <input type="radio" name="rating" value="2" /> <span style="color:#f5c842">★★</span>☆☆☆ 2
-            </label>
-            <label class="flex items-center gap-2 cursor-pointer text-sm">
-              <input type="radio" name="rating" value="1" /> <span style="color:#f5c842">★</span>☆☆☆☆ 1
-            </label>
-          </div>
-        </div>
-
-        <!-- Comment -->
-        <div class="mb-5">
-          <label class="form-label">口コミ（年収・環境・訓練・昇格など）</label>
-          <textarea class="form-input" id="f-comment" placeholder="例: 機長昇格後の年収は機種によって大きく変わります。B777系は手当が厚く、実質¥3,000万超も。訓練体制は充実していますが昇格審査は厳しめです。" required minlength="30"></textarea>
-          <div class="text-xs text-muted mt-1.5">30文字以上 / 個人を特定できる内容（名前・特定の路線・正確な生年月日など）はご遠慮ください</div>
-        </div>
-
-        <!-- Privacy reminder -->
-        <div class="rounded-xl p-4 mb-6" style="background:rgba(52,211,153,.04);border:1px solid rgba(52,211,153,.1)">
-          <div class="flex items-start gap-3">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" class="flex-shrink-0 mt-0.5"><path d="M8 2L2 5v4c0 3 2 5 6 5s6-2 6-5V5L8 2z" stroke="#34d399" stroke-width="1.2"/></svg>
-            <div class="text-xs text-muted leading-relaxed">
-              <strong class="text-text">プライバシー保護について：</strong>
-              投稿された年収は100万円単位に丸めて表示します。年齢・在籍期間は区分（例：30代・10年超）で表示し、正確な数値は掲載しません。個人が特定できると判断された投稿はモデレーションにより非掲載となります。
-            </div>
-          </div>
-        </div>
-
-        <button type="submit" class="btn-orange w-full justify-center text-base py-4">
-          投稿して全データのアクセスを解放する（1ヶ月間）
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 9h12M9 3l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
-        <p class="text-center text-xs text-muted mt-3">完全無料・登録不要・匿名投稿</p>
-
-      </form>
-    </div>
-  </div>
-</section>
 
 
 <!-- ── REVIEW MODAL ───────────────────────────────────────── -->
@@ -900,21 +775,36 @@ window.addEventListener('scroll', () => {
 
 // ── Review data ───────────────────────────────────────────────
 const AIRLINE_COLORS = {
-  ana: '#3d9bff', jal: '#e8192c', skymark: '#0095db', zipair: '#22d3ee',
-  peach: '#f96c9f', jetstar: '#f0851a', spring: '#e83030',
-  delta: '#e01933', united: '#005daa', american: '#c8102e', southwest: '#f9b612',
-  emirates: '#c4943b', qatar: '#8d1b3d', etihad: '#c4943b',
-  singapore: '#0072ce', cathay: '#006564', lufthansa: '#f5c842'
+  ana:'#3d9bff', jal:'#e8192c', skymark:'#0095db', zipair:'#22d3ee',
+  peach:'#f96c9f', jetstar:'#f0851a', spring:'#e83030', airdo:'#003366',
+  solaseed:'#5EBD3E', starflyer:'#2B2D42', fda:'#E03A3E',
+  delta:'#003DA5', united:'#005daa', american:'#c8102e', southwest:'#f9b612', alaska:'#01426A',
+  emirates:'#C6922A', qatar:'#5C0632', etihad:'#BD8B13', 'riyadh-air':'#006B4D',
+  singapore:'#F90B24', cathay:'#006564', lufthansa:'#FFAD00',
+  'air-france':'#002157', british:'#002157', klm:'#009FDB', swiss:'#D20000',
+  turkish:'#E30A17', 'korean-air':'#003087', asiana:'#003399',
+  'air-china':'#CC0000', 'china-eastern':'#006CB8',
+  'air-canada':'#D01D2A', qantas:'#EE1C25',
+  finnair:'#003580', iberia:'#CC0000', ryanair:'#073590',
+  easyjet:'#FF6600', 'air-new-zealand':'#00005C',
 };
 
 const AIRLINE_LABELS = {
   ana:'ANA', jal:'JAL', skymark:'Skymark', zipair:'ZIPAIR', peach:'Peach',
-  jetstar:'Jetstar Japan', spring:'Spring Japan', delta:'Delta', united:'United',
-  american:'American', southwest:'Southwest', emirates:'Emirates', qatar:'Qatar Airways',
-  etihad:'Etihad', singapore:'Singapore Airlines', cathay:'Cathay Pacific', lufthansa:'Lufthansa'
+  jetstar:'Jetstar Japan', spring:'Spring Japan', airdo:'AirDo',
+  solaseed:'Solaseed Air', starflyer:'StarFlyer', fda:'FDA',
+  delta:'Delta', united:'United', american:'American', southwest:'Southwest', alaska:'Alaska',
+  emirates:'Emirates', qatar:'Qatar Airways', etihad:'Etihad', 'riyadh-air':'Riyadh Air',
+  singapore:'Singapore Airlines', cathay:'Cathay Pacific', lufthansa:'Lufthansa',
+  'air-france':'Air France', british:'British Airways', klm:'KLM', swiss:'SWISS',
+  turkish:'Turkish Airlines', 'korean-air':'Korean Air', asiana:'Asiana',
+  'air-china':'Air China', 'china-eastern':'China Eastern',
+  'air-canada':'Air Canada', qantas:'Qantas',
+  finnair:'Finnair', iberia:'Iberia', ryanair:'Ryanair',
+  easyjet:'easyJet', 'air-new-zealand':'Air New Zealand',
 };
 
-// Seed reviews (shown to all, locked ones need unlock)
+// Seed reviews
 const SEED_REVIEWS = [
   { id:1, airline:'ana', position:'captain', salaryRange:'2,500〜3,000万', exp:'16年以上', rating:4,
     comment:'機長年収は機種・年齢で大きく変わる。B777国際線で¥2,700〜2,800万が実態。各種手当含むと¥3,000万超も可能。安定性・退職金・年金は抜群。訓練費負担ゼロも大きい。', date:'2026.03', locked:false },
@@ -931,7 +821,19 @@ const SEED_REVIEWS = [
   { id:7, airline:'ana', position:'fo', salaryRange:'1,600〜2,000万', exp:'4〜7年', rating:4,
     comment:'副操縦士としての待遇は安定。機長昇格審査は厳しめだが、訓練費は全額会社負担。JAL比でFOの給与はやや高め。国際線配属になると手当で大きく変わる。', date:'2026.02', locked:true },
   { id:8, airline:'singapore', position:'captain', salaryRange:'3,200〜4,000万', exp:'8〜15年', rating:4,
-    comment:'シンガポールの物価は高いが所得も高い。SGDベースの給与なので円安メリットあり。ジャンプシート文化がなく、機内の雰囲気はプロフェッショナル。昇格は完全年功序列。', date:'2026.01', locked:true },
+    comment:'シンガポールの物価は高いが所得も高い。SGDベースの給与なので円安メリットあり。ジャンプシート文化がなく機内はプロフェッショナルな雰囲気。昇格は完全年功序列。', date:'2026.01', locked:true },
+  { id:9, airline:'southwest', position:'captain', salaryRange:'4,500〜5,500万', exp:'8〜15年', rating:5,
+    comment:'シニオリティ制で昇格・路線選択がすべて透明。B737専業なので機種転換不要。パスベネフィットが充実しており家族全員がほぼ無料で移動できる。医療保険・401kも優秀。', date:'2026.03', locked:true },
+  { id:10, airline:'cathay', position:'fo', salaryRange:'2,800〜3,500万', exp:'6〜10年', rating:4,
+    comment:'香港の物価は高いが給与もそれに見合う水準。英語環境で多国籍クルーとのフライトが多い。訓練体制は充実しており機長昇格のパスも明確。EFは充実。', date:'2026.02', locked:true },
+  { id:11, airline:'skymark', position:'captain', salaryRange:'1,800〜2,200万', exp:'8〜15年', rating:3,
+    comment:'国内中堅キャリアとしての安定感はある。給与はANA/JALより低いが、昇格スピードは早め。スケジュールの自由度はやや高い。訓練は自社訓練で標準的な水準。', date:'2026.03', locked:true },
+  { id:12, airline:'etihad', position:'captain', salaryRange:'3,800〜4,600万', exp:'8〜15年', rating:4,
+    comment:'アブダビは非課税。Emirates同様の待遇水準だが、規模が小さい分フライトパターンは落ち着きやすい。住宅手当・子供教育費支給あり。中東生活への適応が鍵。', date:'2026.01', locked:true },
+  { id:13, airline:'peach', position:'fo', salaryRange:'800〜1,100万', exp:'1〜5年', rating:3,
+    comment:'LCCとしての給与水準は低め。ただし若手が早期にステップアップできる環境はある。国内線中心でスケジュールは比較的規則的。経験を積んでから転職するパスも多い。', date:'2026.02', locked:true },
+  { id:14, airline:'lufthansa', position:'captain', salaryRange:'3,500〜4,500万', exp:'8〜15年', rating:4,
+    comment:'ヨーロッパ最大規模のフルサービスキャリア。給与+年金+医療保険の総合待遇は欧州トップクラス。ドイツ語は必須ではないが社内環境はドイツ文化色が強い。', date:'2026.03', locked:true },
 ];
 
 // ── Unlock system ─────────────────────────────────────────────
@@ -952,6 +854,7 @@ function unlockAccess() {
 
 // ── Render reviews ────────────────────────────────────────────
 let currentFilter = 'all';
+let sbReviewsCache = null; // Supabase全社口コミキャッシュ
 
 function filterReviews(btn, airline) {
   document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
@@ -963,9 +866,10 @@ function filterReviews(btn, airline) {
 function renderReviews(filter) {
   const feed = document.getElementById('review-feed');
   const unlocked = isUnlocked();
-  let reviews = filter === 'all' ? SEED_REVIEWS : SEED_REVIEWS.filter(r => r.airline === filter);
+  const posLabel = { captain:'機長', fo:'副操縦士', cadet:'訓練生', former:'元乗務員' };
 
-  // Also include user-submitted reviews from localStorage
+  // 1. ローカルストレージの口コミ
+  let reviews = [];
   try {
     const userReviews = JSON.parse(localStorage.getItem('pv_reviews') || '[]');
     const mapped = userReviews.filter(r => filter === 'all' || r.airline === filter).map(r => {
@@ -979,42 +883,70 @@ function renderReviews(filter) {
         locked: false
       };
     });
-    reviews = [...mapped, ...reviews];
+    reviews = [...mapped];
   } catch(e) {}
 
-  const posLabel = { captain:'機長', fo:'副操縦士', cadet:'訓練生', former:'元乗務員' };
+  // 2. Supabaseキャッシュ（取得済みの場合）
+  if (sbReviewsCache) {
+    const sbFiltered = filter === 'all' ? sbReviewsCache : sbReviewsCache.filter(r => r.airline === filter);
+    reviews = [...reviews, ...sbFiltered];
+  }
+
+  // 3. シードレビュー（末尾に追加）
+  const seedFiltered = filter === 'all' ? SEED_REVIEWS : SEED_REVIEWS.filter(r => r.airline === filter);
+  reviews = [...reviews, ...seedFiltered];
+
+  // 件数表示
+  const countEl = document.getElementById('feed-count');
+  if (countEl) countEl.textContent = reviews.length + '件';
 
   feed.innerHTML = reviews.map((r, i) => {
     const color = AIRLINE_COLORS[r.airline] || '#6b7d93';
-    const label = AIRLINE_LABELS[r.airline] || r.airline;
+    const label = AIRLINE_LABELS[r.airline] || r.airline.toUpperCase();
     const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
-    const blurred = r.locked && !unlocked;
+    const blurStyle = r.locked && !unlocked ? ';filter:blur(5px);user-select:none;pointer-events:none' : '';
 
-    return `<div class="review-card fade-up" style="transition-delay:${i * 0.04}s${r.locked && !unlocked ? ';filter:blur(4px);user-select:none;pointer-events:none' : ''}">
-      <div class="flex items-start gap-3 mb-3">
-        <div class="w-9 h-9 rounded-lg flex items-center justify-center font-bold text-xs flex-shrink-0" style="background:${color}22;color:${color}">${label.slice(0,3).toUpperCase()}</div>
-        <div class="flex-1 min-w-0">
-          <div class="flex items-center gap-2 flex-wrap">
-            <span class="font-semibold text-sm">${label}</span>
-            <span class="text-xs px-2 py-0.5 rounded" style="background:rgba(255,255,255,.06);color:#9ca3af">${posLabel[r.position] || r.position}</span>
-            <span class="stars text-xs">${stars}</span>
-          </div>
-          <div class="text-xs text-muted mt-0.5">経験 ${r.exp} · ${r.date}</div>
-        </div>
-        <div class="text-right flex-shrink-0">
-          <div class="text-sm font-bold" style="color:${color}">${r.salaryRange}</div>
-          <div class="text-xs text-muted">年収（概算）</div>
-        </div>
+    return `<div class="review-card fade-up" style="transition-delay:${Math.min(i,8) * 0.04}s${blurStyle}">
+      <div class="flex items-center gap-2 flex-wrap mb-3">
+        <span style="display:inline-block;padding:3px 10px;border-radius:6px;font-size:.75rem;font-weight:700;background:${color}20;color:${color};border:1px solid ${color}40">${label}</span>
+        <span style="font-size:.75rem;padding:3px 8px;border-radius:5px;background:rgba(255,255,255,.06);color:#9ca3af">${posLabel[r.position] || r.position}</span>
+        <span style="color:#f5c842;font-size:.82rem;letter-spacing:.03em">${stars}</span>
+        <span style="font-size:.72rem;color:#6b7d93;margin-left:auto">経験 ${r.exp} · ${r.date}</span>
       </div>
-      <p class="text-sm text-muted leading-relaxed">${r.comment}</p>
+      <div style="font-size:.85rem;font-weight:700;color:${color};margin-bottom:8px">${r.salaryRange} <span style="font-size:.72rem;font-weight:400;color:#6b7d93">年収（概算）</span></div>
+      <p style="font-size:.87rem;color:#9daec4;line-height:1.75;margin:0">${r.comment}</p>
     </div>`;
-  }).join('');
+  }).join('') || '<p style="color:#6b7d93;font-size:.9rem;padding:20px 0">口コミがまだありません。最初の投稿者になりましょう。</p>';
 
-  // Show/hide gate
+  // ゲート表示制御
   document.getElementById('gate-panel').style.display = unlocked ? 'none' : '';
 
-  // Re-observe new elements
+  // 新要素をIntersectionObserverに登録
   document.querySelectorAll('.review-card.fade-up:not(.visible)').forEach(el => io.observe(el));
+}
+
+// Supabaseから全社口コミを非同期取得
+async function loadSupabaseReviews() {
+  try {
+    const { data } = await _sbC.from('reviews')
+      .select('id,airline,position,years,avg_rating,salary_total,comment,created_at')
+      .order('created_at', { ascending: false })
+      .limit(200);
+    if (data && data.length > 0) {
+      sbReviewsCache = data.map(r => ({
+        id: 'sb_' + r.id,
+        airline: r.airline || '',
+        position: r.position || '',
+        salaryRange: r.salary_total > 0 ? Math.floor(r.salary_total/100)*100 + '万円' : '非公開',
+        exp: r.years || '—',
+        rating: Math.round(r.avg_rating || 3),
+        comment: r.comment || '',
+        date: r.created_at ? r.created_at.slice(0,7).replace('-','.') : '—',
+        locked: false
+      }));
+      renderReviews(currentFilter);
+    }
+  } catch(e) {}
 }
 
 // ── Modal ─────────────────────────────────────────────────────
@@ -1259,6 +1191,7 @@ setTimeout(() => { document.querySelectorAll('.fade-up:not(.visible)').forEach(e
 
 // ── Init ──────────────────────────────────────────────────────
 renderReviews('all');
+loadSupabaseReviews(); // 全社口コミを非同期取得→再描画
 if (isUnlocked()) {
   document.getElementById('unlock-badge').classList.remove('hidden');
 }
