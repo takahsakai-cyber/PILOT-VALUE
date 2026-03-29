@@ -4,19 +4,25 @@
   <!-- ─── Root pages ─── -->
   <url>
     <loc>https://pilot-value.com/</loc>
-    <lastmod>2026-03-28</lastmod>
+    <lastmod>2026-03-30</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
+    <loc>https://pilot-value.com/pilot-salary-guide.html</loc>
+    <lastmod>2026-03-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.95</priority>
+  </url>
+  <url>
     <loc>https://pilot-value.com/world-airlines.html</loc>
-    <lastmod>2026-03-28</lastmod>
+    <lastmod>2026-03-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://pilot-value.com/world-jobs.html</loc>
-    <lastmod>2026-03-28</lastmod>
+    <lastmod>2026-03-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -86,7 +92,7 @@
   <url><loc>https://pilot-value.com/airlines/allegiant.html</loc><lastmod>2026-03-28</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://pilot-value.com/airlines/american.html</loc><lastmod>2026-03-28</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
   <url><loc>https://pilot-value.com/airlines/amx.html</loc><lastmod>2026-03-28</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://pilot-value.com/airlines/ana.html</loc><lastmod>2026-03-28</lastmod><changefreq>monthly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://pilot-value.com/airlines/ana.html</loc><lastmod>2026-03-30</lastmod><changefreq>monthly</changefreq><priority>1.0</priority></url>
   <url><loc>https://pilot-value.com/airlines/ana-wings.html</loc><lastmod>2026-03-28</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://pilot-value.com/airlines/austrian.html</loc><lastmod>2026-03-28</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://pilot-value.com/airlines/avianca.html</loc><lastmod>2026-03-28</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
@@ -124,7 +130,7 @@
   <url><loc>https://pilot-value.com/airlines/ita-airways.html</loc><lastmod>2026-03-28</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://pilot-value.com/airlines/j-air.html</loc><lastmod>2026-03-28</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://pilot-value.com/airlines/jac.html</loc><lastmod>2026-03-28</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://pilot-value.com/airlines/jal.html</loc><lastmod>2026-03-28</lastmod><changefreq>monthly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://pilot-value.com/airlines/jal.html</loc><lastmod>2026-03-30</lastmod><changefreq>monthly</changefreq><priority>1.0</priority></url>
   <url><loc>https://pilot-value.com/airlines/jetblue.html</loc><lastmod>2026-03-28</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://pilot-value.com/airlines/jetstar.html</loc><lastmod>2026-03-28</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://pilot-value.com/airlines/jetstar-japan.html</loc><lastmod>2026-03-28</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
