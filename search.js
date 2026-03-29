@@ -247,14 +247,17 @@
     var dd  = document.getElementById('pv-search-dd');
     if (!box || !dd) return;
     var rect = box.getBoundingClientRect();
+    var vw = window.innerWidth;
     dd.style.top = (rect.bottom + 6) + 'px';
-    if (window.innerWidth <= 640) {
+    // Mobile: touch device, narrow viewport, OR box layout not ready (rect.width==0)
+    var isMobile = vw <= 768 || ('ontouchstart' in window) || rect.width === 0 || rect.width > vw * 0.35;
+    if (isMobile) {
       dd.style.left  = '8px';
       dd.style.right = '8px';
       dd.style.width = 'auto';
     } else {
       dd.style.left  = 'auto';
-      dd.style.right = Math.max(8, window.innerWidth - rect.right) + 'px';
+      dd.style.right = Math.max(8, vw - rect.right) + 'px';
       dd.style.width = '320px';
     }
   }
