@@ -291,9 +291,9 @@ function injectSEOMeta() {
   const englishName = subtitle ? subtitle.textContent.split('—')[0].trim() : '';
   const { ratings } = getAirlineRatings();
   const avg = (ratings.reduce((a,b)=>a+b,0)/ratings.length).toFixed(1);
-  const desc = `${airlineName}のパイロット年収・口コミ・評価。総合評価${avg}/5.0。機長・副操縦士の実際の給与、職場環境、訓練体制をパイロット目線で掲載。${englishName ? englishName + ' — ' : ''}PILOT VALUE`;
+  const desc = `${airlineName}のパイロット年収・転職情報。機長・副操縦士の給与、採用情報、現役パイロットによる口コミ・評価を掲載。${englishName ? englishName + 'の' : ''}パイロット年収・転職ならPILOT VALUE。`;
   const canonical = `https://pilot-value.com/airlines/${AIRLINE_CODE}.html`;
-  const newTitle = `${airlineName} パイロット 年収・口コミ・評価 | PILOT VALUE`;
+  const newTitle = `${airlineName}パイロット年収・転職情報｜機長・副操縦士の給与・口コミ | PILOT VALUE`;
   document.title = newTitle;
 
   const setMeta = (attr, key, val) => {
@@ -303,13 +303,14 @@ function injectSEOMeta() {
   };
 
   setMeta('name', 'description', desc);
+  setMeta('name', 'keywords', `${airlineName} パイロット 年収,${airlineName} 機長 年収,${airlineName} 転職,${airlineName} パイロット 口コミ,パイロット年収`);
   setMeta('name', 'robots', 'index,follow');
   setMeta('property', 'og:title', newTitle);
   setMeta('property', 'og:description', desc);
   setMeta('property', 'og:url', canonical);
-  setMeta('property', 'og:type', 'website');
+  setMeta('property', 'og:type', 'article');
   setMeta('property', 'og:site_name', 'PILOT VALUE');
-  setMeta('name', 'twitter:card', 'summary');
+  setMeta('name', 'twitter:card', 'summary_large_image');
   setMeta('name', 'twitter:title', newTitle);
   setMeta('name', 'twitter:description', desc);
 
@@ -326,24 +327,52 @@ function injectSchemaOrg() {
   const avg = (ratings.reduce((a,b)=>a+b,0)/ratings.length).toFixed(1);
   const ratingCount = count > 0 ? count + 3 : 3;
 
-  const schema = {
-    '@context': 'https://schema.org',
-    '@type': 'Organization',
-    'name': airlineName,
-    'url': `https://pilot-value.com/airlines/${AIRLINE_CODE}.html`,
-    'aggregateRating': {
-      '@type': 'AggregateRating',
-      'ratingValue': avg,
-      'bestRating': '5',
-      'worstRating': '1',
-      'ratingCount': ratingCount
+  const pageUrl = `https://pilot-value.com/airlines/${AIRLINE_CODE}.html`;
+  const schemas = [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'Organization',
+      'name': airlineName,
+      'url': pageUrl,
+      'aggregateRating': {
+        '@type': 'AggregateRating',
+        'ratingValue': avg,
+        'bestRating': '5',
+        'worstRating': '1',
+        'ratingCount': ratingCount
+      }
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      'itemListElement': [
+        {'@type':'ListItem','position':1,'name':'PILOT VALUE','item':'https://pilot-value.com'},
+        {'@type':'ListItem','position':2,'name':'世界の航空会社一覧','item':'https://pilot-value.com/world-airlines.html'},
+        {'@type':'ListItem','position':3,'name':`${airlineName} パイロット年収`,'item': pageUrl}
+      ]
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      'mainEntity': [
+        {
+          '@type': 'Question',
+          'name': `${airlineName}のパイロット年収はいくらですか？`,
+          'acceptedAnswer': {'@type':'Answer','text':`${airlineName}のパイロット年収は、副操縦士で1,000〜1,600万円、機長で1,800〜2,800万円が目安です。PILOT VALUEでは現役パイロットによる口コミ・詳細な給与情報を掲載しています。`}
+        },
+        {
+          '@type': 'Question',
+          'name': `${airlineName}のパイロットに転職するには？`,
+          'acceptedAnswer': {'@type':'Answer','text':`${airlineName}のパイロット採用は自社養成・経験者採用があります。必要資格・採用条件・年収・口コミについてはPILOT VALUEの${airlineName}ページをご覧ください。`}
+        }
+      ]
     }
-  };
+  ];
 
   const script = document.createElement('script');
   script.id = 'pv-schema-org';
   script.type = 'application/ld+json';
-  script.textContent = JSON.stringify(schema);
+  script.textContent = JSON.stringify(schemas);
   document.head.appendChild(script);
 
   // Update ratingCount async once Supabase resolves real review count
