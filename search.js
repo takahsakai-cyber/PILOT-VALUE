@@ -192,7 +192,7 @@
     '[data-theme=light] .pv-si mark{background:rgba(160,114,0,.14);color:#92690a}',
     '.pv-search-empty{padding:16px 14px;font-size:.8rem;color:#6b7d93;text-align:center}',
     /* mobile */
-    '@media(max-width:640px){#pv-search-box{width:160px}#pv-search-dd{width:calc(100vw - 24px);right:-12px}}',
+    '@media(max-width:640px){#pv-search-box{position:fixed;left:10px;right:10px;top:8px;width:auto;height:42px;border-radius:12px;z-index:9000;box-shadow:0 4px 20px rgba(0,0,0,.5)}#pv-search-dd{position:fixed;left:10px;right:10px;top:58px;width:auto}}',
   ].join('');
   document.head.appendChild(style);
 

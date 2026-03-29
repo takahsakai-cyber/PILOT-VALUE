@@ -160,6 +160,15 @@ const AIRLINE_DISPLAY_CODE = {
 };
 const CAT_SHORT = ['企業文化','年収・給与','福利厚生','人間関係','訓練環境','運航環境','スケジュール'];
 const CAT_FULL  = ['企業カルチャー','年収・給与の納得度','福利厚生','職場の人間関係','訓練環境','運航環境','スケジュール安定性'];
+const REVIEW_CATS = [
+  {key:'salary',   label:'給与制度'},
+  {key:'eval',     label:'評価制度'},
+  {key:'benefits', label:'福利厚生'},
+  {key:'wlb',      label:'ワークライフバランス'},
+  {key:'ops',      label:'運航環境'},
+  {key:'diversity',label:'ダイバーシティ'},
+  {key:'mgmt',     label:'経営陣へ提案'},
+];
 
 function getAirlineRatings() {
   const seed = RATINGS[AIRLINE_CODE] || DEFAULT_R;
@@ -360,6 +369,9 @@ function injectHeroRatingBanner() {
   const hero = document.querySelector('.hero-airline');
   if (!hero) return;
 
+  const h1 = document.querySelector('.hero-airline h1');
+  const airlineName = h1 ? h1.textContent.trim() : (AIRLINE_CODE || '').toUpperCase();
+
   const {ratings, count} = getAirlineRatings();
   const avg = ratings.reduce((a,b)=>a+b,0) / ratings.length;
   const avgStr = avg.toFixed(1);
@@ -382,6 +394,7 @@ function injectHeroRatingBanner() {
   section.id = 'airline-rating-banner';
   section.innerHTML = `
     <div class="max-w-7xl mx-auto px-6">
+      <div class="hrb-heading">パイロットによる評価スコア — ${airlineName}</div>
       <div class="hrb-inner">
         <div class="hrb-score-block">
           <div class="hrb-label">パイロット総合評価</div>
@@ -561,7 +574,7 @@ function reviewCardInnerHTML(r) {
   return `<div class="detail-review-card">
     <div class="rv-card-head">
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-        <span class="rv-card-type">年収・給与</span>
+        <span class="rv-card-type">${(REVIEW_CATS.find(function(c){return c.key===r.cat;})||{label:'口コミ'}).label}</span>
         <span class="rv-reviewer-meta">パイロット<span class="rv-meta-sep"> | </span>${pos}<span class="rv-meta-sep"> | </span>在籍${years}年目<span class="rv-meta-sep"> | </span>${join}入社</span>
       </div>
       <span class="rv-date">口コミ投稿日: ${r.date||''}</span>
@@ -584,13 +597,24 @@ function reviewCardHTML(r, blurred) {
   return `<div class="rv-card-wrap">
     <div class="rv-card-blur">${inner}</div>
     <div class="rv-card-gate">
-      <button class="btn-review-post" onclick="window.location='../community.html'">
+      <button class="btn-review-post" onclick="openReviewModal()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
         口コミを見る
       </button>
     </div>
   </div>`;
 }
+
+// ── Review Category Filter ──────────────────────────
+var pvReviewCatFilter = 'all';
+window.pvSetReviewCat = function(cat) {
+  pvReviewCatFilter = cat;
+  switchTab('reviews');
+  renderReviews();
+  setTimeout(function(){
+    document.getElementById('airline-review-section')?.scrollIntoView({behavior:'smooth', block:'start'});
+  }, 50);
+};
 
 // ── Auth helpers ───────────────────────────────────
 function isLoggedIn() {
@@ -621,7 +645,7 @@ function showReadMoreGate() {
       <div style="font-weight:700;font-size:1rem;margin-bottom:8px;color:#e8edf2">続きを読むには口コミの投稿が必要です</div>
       <p style="font-size:.82rem;color:#6b7d93;line-height:1.65;margin-bottom:22px">自分の年収・口コミを1件投稿すると<br>全てのレビュー全文を<strong style="color:#e8edf2">1ヶ月間</strong>閲覧できます</p>
       <div style="display:flex;flex-direction:column;gap:10px">
-        <button class="btn-review-post" style="width:100%;justify-content:center" onclick="window.location='../community.html'">
+        <button class="btn-review-post" style="width:100%;justify-content:center" onclick="openReviewModal()">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
           口コミを投稿して解放する
         </button>
@@ -632,6 +656,164 @@ function showReadMoreGate() {
   modal.addEventListener('click', function(e){ if(e.target===modal) modal.style.display='none'; });
   document.body.appendChild(modal);
 }
+
+// ── Inline Review Modal (3-step) ───────────────────
+window.openReviewModal = function() {
+  var existing = document.getElementById('pv-review-modal');
+  if (existing) { existing.style.display = 'flex'; return; }
+
+  var MODAL_CATS = ['企業カルチャー','年収・給与の納得度','福利厚生','職場の人間関係の満足度','訓練環境','運航環境','スケジュール変更の多さ'];
+  var YEARS_OPTS = [['1-3','1〜3年目'],['4-7','4〜7年目'],['8-12','8〜12年目'],['13-17','13〜17年目'],['16-20','16〜20年目'],['21+','21年以上']];
+  var step = 1;
+  var pos = '', years = '', join = '', cat = '';
+  var stars = [0,0,0,0,0,0,0];
+  var salary = 0, monthly = 0, overtime = 0, bonus = 0;
+  var commentText = '';
+
+  var overlay = document.createElement('div');
+  overlay.id = 'pv-review-modal';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;align-items:flex-start;justify-content:center;background:rgba(0,0,0,.78);backdrop-filter:blur(6px);padding:24px 16px;overflow-y:auto';
+  overlay.addEventListener('click', function(e){ if(e.target===overlay) overlay.style.display='none'; });
+  document.body.appendChild(overlay);
+
+  function render() {
+    var dots = [1,2,3].map(function(n){
+      return '<span style="width:9px;height:9px;border-radius:50%;display:inline-block;background:'+(n<=step?'#f5c842':'rgba(255,255,255,.18)')+'"></span>';
+    }).join('');
+
+    var content = '';
+    if (step === 1) {
+      var starsHtml = MODAL_CATS.map(function(lbl, ci){
+        var row = [1,2,3,4,5].map(function(n){
+          return '<span class="rmt-star" data-cat="'+ci+'" data-val="'+n+'" style="font-size:1.6rem;cursor:pointer;user-select:none;color:'+(n<=stars[ci]?'#f5c842':'rgba(255,255,255,.18)')+'">★</span>';
+        }).join('');
+        return '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06)"><span style="font-size:.83rem;color:#c8d4e0">'+lbl+'</span><div data-catrow="'+ci+'">'+row+'</div></div>';
+      }).join('');
+      var posHtml = ['captain','fo','cadet'].map(function(v){
+        var lbl = {captain:'機長',fo:'副操縦士',cadet:'訓練生'}[v];
+        return '<button type="button" class="rmt-pill'+(pos===v?' active':'')+'" data-field="pos" data-val="'+v+'">'+lbl+'</button>';
+      }).join('');
+      var joinHtml = ['new','mid'].map(function(v){
+        var lbl = {new:'新卒',mid:'中途'}[v];
+        return '<button type="button" class="rmt-pill'+(join===v?' active':'')+'" data-field="join" data-val="'+v+'">'+lbl+'</button>';
+      }).join('');
+      var yearsHtml = YEARS_OPTS.map(function(y){
+        return '<option value="'+y[0]+'"'+(years===y[0]?' selected':'')+'>'+y[1]+'</option>';
+      }).join('');
+      var reviewCatHtml = REVIEW_CATS.map(function(c){
+        return '<button type="button" class="rmt-pill'+(cat===c.key?' active':'')+'" data-field="cat" data-val="'+c.key+'">'+c.label+'</button>';
+      }).join('');
+
+      content = '<h2 style="font-size:1.2rem;font-weight:800;margin-bottom:4px">Step 1 — 基本情報と評価</h2>'
+        +'<p style="font-size:.78rem;color:#7b8fa3;margin-bottom:20px">口コミカテゴリ・職位を選び、7項目を★で評価してください。</p>'
+        +'<div style="margin-bottom:14px"><div style="font-size:.73rem;color:#7b8fa3;margin-bottom:7px">口コミカテゴリ</div><div style="display:flex;gap:7px;flex-wrap:wrap">'+reviewCatHtml+'</div></div>'
+        +'<div style="margin-bottom:14px"><div style="font-size:.73rem;color:#7b8fa3;margin-bottom:7px">職位</div><div style="display:flex;gap:7px;flex-wrap:wrap">'+posHtml+'</div></div>'
+        +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">'
+        +'<div><div style="font-size:.73rem;color:#7b8fa3;margin-bottom:5px">何年目</div>'
+        +'<select id="rmt-years" style="width:100%;padding:9px 10px;background:#1a2133;border:1px solid rgba(255,255,255,.12);border-radius:8px;color:#e8edf2;font-size:.83rem"><option value="">選択してください</option>'+yearsHtml+'</select></div>'
+        +'<div><div style="font-size:.73rem;color:#7b8fa3;margin-bottom:7px">入社形態</div><div style="display:flex;gap:7px">'+joinHtml+'</div></div></div>'
+        +'<div style="font-size:.78rem;font-weight:700;margin-bottom:2px">7項目評価（必須）</div>'
+        +'<div style="font-size:.71rem;color:#7b8fa3;margin-bottom:6px">各カテゴリを★1〜5でタップ</div>'
+        +starsHtml;
+    } else if (step === 2) {
+      var fields = [['年間収入（万円）','rmt-salary',salary],['月給基本給（万円）','rmt-monthly',monthly],['残業代 月平均（万円）','rmt-overtime',overtime],['ボーナス 年間（万円）','rmt-bonus',bonus]];
+      content = '<h2 style="font-size:1.2rem;font-weight:800;margin-bottom:4px">Step 2 — 年収情報</h2>'
+        +'<p style="font-size:.78rem;color:#7b8fa3;margin-bottom:20px">わかる範囲でご記入ください（任意）</p>'
+        +fields.map(function(f){
+          return '<div style="margin-bottom:13px"><label style="font-size:.76rem;color:#7b8fa3;display:block;margin-bottom:5px">'+f[0]+'</label>'
+            +'<input id="'+f[1]+'" type="number" min="0" max="99999" value="'+(f[2]||'')+'" placeholder="例: 1200" style="width:100%;padding:9px 12px;background:#1a2133;border:1px solid rgba(255,255,255,.12);border-radius:8px;color:#e8edf2;font-size:.88rem;box-sizing:border-box"></div>';
+        }).join('');
+    } else {
+      content = '<h2 style="font-size:1.2rem;font-weight:800;margin-bottom:4px">Step 3 — 口コミ</h2>'
+        +'<p style="font-size:.78rem;color:#7b8fa3;margin-bottom:14px">給与・待遇・職場環境など自由にご記入ください</p>'
+        +'<textarea id="rmt-comment" placeholder="例: 年功序列の給与体系で安定感があります…" rows="7" style="width:100%;padding:12px 14px;background:#1a2133;border:1px solid rgba(255,255,255,.12);border-radius:8px;color:#e8edf2;font-size:.84rem;line-height:1.65;box-sizing:border-box;resize:vertical">'+commentText+'</textarea>'
+        +'<div style="font-size:.7rem;color:#7b8fa3;margin-top:7px">完全匿名・個人情報不要</div>';
+    }
+
+    overlay.innerHTML = '<div style="background:#111620;border:1px solid rgba(255,255,255,.09);border-radius:20px;padding:28px 24px;width:100%;max-width:460px;position:relative;margin:auto">'
+      +'<button onclick="document.getElementById(\'pv-review-modal\').style.display=\'none\'" style="position:absolute;top:12px;right:14px;background:rgba(255,255,255,.07);border:none;color:#9daec4;cursor:pointer;font-size:.95rem;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;line-height:1">✕</button>'
+      +'<div style="display:flex;gap:6px;align-items:center;margin-bottom:22px">'+dots+'</div>'
+      +content
+      +'<button id="rmt-next" style="margin-top:20px;width:100%;padding:13px;background:linear-gradient(135deg,#f5c842,#f0a500);border:none;border-radius:10px;color:#1a1500;font-weight:800;font-size:.92rem;cursor:pointer">'+(step===3?'投稿して口コミを見る →':'次へ →')+'</button>'
+      +'</div>';
+
+    // Pill toggles
+    overlay.querySelectorAll('.rmt-pill').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(btn.dataset.field==='pos') pos=btn.dataset.val;
+        else if(btn.dataset.field==='join') join=btn.dataset.val;
+        else if(btn.dataset.field==='cat') cat=btn.dataset.val;
+        render();
+      });
+    });
+
+    // Star ratings
+    overlay.querySelectorAll('.rmt-star').forEach(function(s){
+      s.addEventListener('click', function(){ stars[+s.dataset.cat]=+s.dataset.val; render(); });
+      s.addEventListener('mouseenter', function(){
+        var ci=+s.dataset.cat, v=+s.dataset.val;
+        overlay.querySelectorAll('[data-catrow="'+ci+'"] .rmt-star').forEach(function(x){ x.style.color=+x.dataset.val<=v?'#f5c842':'rgba(255,255,255,.18)'; });
+      });
+      s.addEventListener('mouseleave', function(){
+        var ci=+s.dataset.cat;
+        overlay.querySelectorAll('[data-catrow="'+ci+'"] .rmt-star').forEach(function(x){ x.style.color=+x.dataset.val<=stars[ci]?'#f5c842':'rgba(255,255,255,.18)'; });
+      });
+    });
+
+    // Years select
+    var ysel=overlay.querySelector('#rmt-years');
+    if(ysel) ysel.addEventListener('change', function(){ years=ysel.value; });
+
+    // Next / Submit
+    overlay.querySelector('#rmt-next').addEventListener('click', function(){
+      if(step===1){
+        if(stars.every(function(v){return v===0;})){ alert('7項目を★でタップして評価してください'); return; }
+        step=2; render();
+      } else if(step===2){
+        salary=parseFloat(overlay.querySelector('#rmt-salary').value)||0;
+        monthly=parseFloat(overlay.querySelector('#rmt-monthly').value)||0;
+        overtime=parseFloat(overlay.querySelector('#rmt-overtime').value)||0;
+        bonus=parseFloat(overlay.querySelector('#rmt-bonus').value)||0;
+        step=3; render();
+      } else {
+        commentText=(overlay.querySelector('#rmt-comment').value||'').trim();
+        submitReview();
+      }
+    });
+  }
+
+  async function submitReview() {
+    var avg = stars.reduce(function(a,b){return a+b;},0)/stars.length;
+    var now = Date.now();
+    var review = {
+      airline:AIRLINE_CODE, position:pos||'fo', years:years||'1-3', join:join||'new',
+      avgRating:+avg.toFixed(2), salary:salary, monthly:monthly, overtime:overtime, bonus:bonus,
+      comment:commentText||'(口コミなし)', cat:cat, ts:now
+    };
+    try {
+      var all = JSON.parse(localStorage.getItem('pv_reviews')||'[]');
+      all.unshift(review);
+      localStorage.setItem('pv_reviews', JSON.stringify(all));
+    } catch(e){}
+    localStorage.setItem('pv_unlock_expiry', (now+30*24*60*60*1000).toString());
+    try {
+      await _initSB();
+      if(_sb){
+        await _sb.from('reviews').insert({
+          airline:AIRLINE_CODE, position:pos||'fo', years:years||'1-3', join_type:join||'new',
+          avg_rating:avg, salary_total:salary, monthly:monthly, overtime:overtime, bonus:bonus,
+          comment:commentText||'(口コミなし)',
+          cat1:stars[0],cat2:stars[1],cat3:stars[2],cat4:stars[3],cat5:stars[4],cat6:stars[5],cat7:stars[6]
+        });
+      }
+    } catch(e){}
+    overlay.style.display = 'none';
+    switchTab('reviews');
+    document.getElementById('airline-review-section')?.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+
+  render();
+};
 
 async function renderReviews() {
   const section = document.getElementById('airline-review-section');
@@ -646,6 +828,7 @@ async function renderReviews() {
       avgRating: r.avgRating||r.rating||3,
       comment: r.payText||r.comment||'',
       salaryTotal: r.salary||0, monthly: r.monthly||0, overtime: r.overtime||0, bonus: r.bonus||0,
+      cat: r.cat||'',
       date: new Date(r.ts).toLocaleDateString('ja-JP',{year:'numeric',month:'2-digit'}).replace('/','.',).slice(0,7),
     }));
     reviews = [...mine, ...reviews];
@@ -653,20 +836,29 @@ async function renderReviews() {
 
   function paint(revList) {
     const unlocked = isUnlocked();
-    const cardsHTML = revList.map((r, i) => reviewCardHTML(r, i > 0 && !unlocked)).join('');
+    const filtered = pvReviewCatFilter !== 'all'
+      ? revList.filter(r => r.cat === pvReviewCatFilter)
+      : revList;
+    const cardsHTML = filtered.map((r, i) => reviewCardHTML(r, i > 0 && !unlocked)).join('');
+    const chipsHTML = [{key:'all',label:'全て'}].concat(REVIEW_CATS).map(c =>
+      `<button class="rcf-chip${pvReviewCatFilter===c.key?' active':''}" onclick="pvSetReviewCat('${c.key}')">${c.label}</button>`
+    ).join('');
+    const emptyMsg = filtered.length === 0
+      ? `<div style="text-align:center;padding:32px 0;color:#6b7d93;font-size:.85rem">このカテゴリの口コミはまだありません。<br>最初の口コミを投稿してみましょう。</div>` : '';
     const postGate = !unlocked ? `
       <div class="rv-post-gate">
         <div style="font-size:.85rem;font-weight:700;margin-bottom:6px">全ての口コミを解放する</div>
         <p style="font-size:.78rem;color:#6b7d93;margin-bottom:14px">自分の年収・口コミを1件投稿すると全データを<strong>1ヶ月間</strong>無料で閲覧できます</p>
-        <button class="btn-review-post" onclick="window.location='../community.html'">口コミを投稿して解放する →</button>
+        <button class="btn-review-post" onclick="openReviewModal()">口コミを投稿して解放する →</button>
         <div style="font-size:.72rem;color:#6b7d93;margin-top:8px">完全無料・匿名・個人情報不要</div>
       </div>` : '';
     section.innerHTML = `
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
         <h2 style="font-size:1.2rem;font-weight:700">口コミ一覧</h2>
-        <button class="btn-review-post" style="font-size:.8rem;padding:8px 18px" onclick="window.location='../community.html'">＋ 口コミを投稿する</button>
+        <button class="btn-review-post" style="font-size:.8rem;padding:8px 18px" onclick="openReviewModal()">＋ 口コミを投稿する</button>
       </div>
-      ${cardsHTML}
+      <div class="rcf-chips">${chipsHTML}</div>
+      ${cardsHTML}${emptyMsg}
       ${postGate}`;
   }
 
@@ -687,6 +879,7 @@ async function renderReviews() {
         comment: r.comment||'',
         salaryTotal: r.salary_total||0, monthly: r.monthly||0,
         overtime: r.overtime||0, bonus: r.bonus||0,
+        cat: r.review_cat||'',
         date: r.created_at ? new Date(r.created_at).toLocaleDateString('ja-JP',{year:'numeric',month:'2-digit'}).replace('/','.',).slice(0,7) : '',
       }));
       // Supabaseの実データ + シードデータをマージ（実データを先頭に）
@@ -739,6 +932,46 @@ function reviewCount() {
     n += all.filter(r => r.airline === AIRLINE_CODE).length;
   } catch(e){}
   return n;
+}
+
+// ── Review Category Grid ────────────────────────────
+function injectReviewCategoryGrid() {
+  const banner = document.getElementById('airline-rating-banner');
+  if (!banner) return;
+
+  const h1 = document.querySelector('.hero-airline h1');
+  const airlineName = h1 ? h1.textContent.trim() : '';
+  const cnt = reviewCount();
+
+  const CAT_ICONS = [
+    '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
+    '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
+    '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>',
+    '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+    '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.68 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.17h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.27a16 16 0 0 0 5.82 5.82l.95-.95a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>',
+    '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+    '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+  ];
+
+  const chevron = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>';
+
+  const cardsHTML = REVIEW_CATS.map((c, i) => `
+    <button class="rcg-card" onclick="pvSetReviewCat('${c.key}')">
+      <span class="rcg-icon">${CAT_ICONS[i]}</span>
+      <span class="rcg-label">${c.label}</span>
+      <span class="rcg-count">${cnt}件</span>
+      <span class="rcg-chevron">${chevron}</span>
+    </button>`).join('');
+
+  const section = document.createElement('div');
+  section.id = 'airline-review-cats';
+  section.innerHTML = `
+    <div class="max-w-7xl mx-auto px-6 py-6">
+      <div class="rcg-heading">カテゴリ別のパイロット口コミ（${cnt}件）<span class="rcg-airline"> — ${airlineName}</span></div>
+      <div class="rcg-grid">${cardsHTML}</div>
+    </div>`;
+
+  banner.insertAdjacentElement('afterend', section);
 }
 
 // ── DOM Ready ──────────────────────────────────────
@@ -799,6 +1032,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Inject hero rating banner (visible on page load)
   injectHeroRatingBanner();
+  injectReviewCategoryGrid();
 
   // SEO meta tags + Schema.org
   injectSEOMeta();
