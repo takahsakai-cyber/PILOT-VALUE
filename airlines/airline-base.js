@@ -988,17 +988,18 @@ document.addEventListener('DOMContentLoaded', function() {
       if (u && u.name) {
         authBtn.href = '../profile.html';
         authBtn.textContent = u.name.replace(/[\s　].*/, ''); // first name
+        authBtn.className = 'hidden md:inline-flex';
         authBtn.style.cssText = 'font-size:.82rem;font-weight:700;color:#f5c842;padding:7px 0;text-decoration:none;letter-spacing:.01em';
       } else {
         authBtn.href = '../login.html';
         authBtn.textContent = 'ログイン';
-        authBtn.className = 'btn-ghost';
+        authBtn.className = 'btn-ghost hidden md:inline-flex';
         authBtn.style.cssText = 'font-size:.82rem;padding:7px 14px';
       }
     } catch(e2) {
       authBtn.href = '../login.html';
       authBtn.textContent = 'ログイン';
-      authBtn.className = 'btn-ghost';
+      authBtn.className = 'btn-ghost hidden md:inline-flex';
       authBtn.style.cssText = 'font-size:.82rem;padding:7px 14px';
     }
     var lastChild = navRight.lastElementChild;
