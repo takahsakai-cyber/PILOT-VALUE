@@ -424,26 +424,14 @@
       <button class="filter-chip" onclick="filterReviews(this,'lufthansa')">Lufthansa</button>
     </div>
 
-    <!-- Gate wrapper: blurs bottom rows if not unlocked -->
+    <!-- Gate wrapper -->
     <div id="review-feed-wrapper" class="relative">
 
-      <!-- Reviews list -->
+      <!-- Reviews list (gate panel injected by JS after card[0]) -->
       <div id="review-feed" class="space-y-4 fade-up" style="transition-delay:.1s">
         <!-- Populated by JS -->
       </div>
 
-      <!-- Gate overlay (shown if not unlocked) -->
-      <div id="gate-panel" class="absolute bottom-0 left-0 right-0 pt-32 pb-8 text-center" style="background:linear-gradient(to bottom, transparent 0%, rgba(10,12,15,.97) 40%, rgba(10,12,15,1) 100%);border-radius:0 0 16px 16px">
-        <div class="inline-block glass-raised px-8 py-6 rounded-2xl max-w-md mx-auto" style="border-color:rgba(245,200,66,.2)">
-          <div class="text-2xl mb-2">🔒</div>
-          <div class="font-bold text-lg mb-2">全ての口コミを見るには</div>
-          <p class="text-sm text-muted mb-5">自分の年収・口コミを1件投稿すると<br>すべてのデータを<strong class="text-text">1ヶ月間無料で</strong>閲覧できます</p>
-          <button onclick="openModal()" class="btn-orange">口コミを投稿して解放する
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button>
-          <div class="mt-4 text-xs text-muted">完全無料・匿名・個人情報不要</div>
-        </div>
-      </div>
     </div>
 
   </div>
@@ -847,7 +835,7 @@ function unlockAccess() {
   const expiry = Date.now() + 30 * 24 * 60 * 60 * 1000; // 30 days
   localStorage.setItem('pv_unlock_expiry', expiry.toString());
   renderReviews(currentFilter);
-  document.getElementById('gate-panel').style.display = 'none';
+  const gp = document.getElementById('gate-panel'); if (gp) gp.style.display = 'none';
   document.getElementById('unlock-badge').classList.remove('hidden');
   window.scrollTo({ top: document.getElementById('review-feed-wrapper').offsetTop - 100, behavior: 'smooth' });
 }
@@ -900,13 +888,25 @@ function renderReviews(filter) {
   const countEl = document.getElementById('feed-count');
   if (countEl) countEl.textContent = reviews.length + '件';
 
+  const gateHTML = !unlocked ? `<div id="gate-panel" style="position:relative;margin-top:-4px;padding:56px 16px 32px;text-align:center;background:linear-gradient(to bottom,transparent 0%,rgba(10,12,15,.97) 35%,rgba(10,12,15,1) 100%)">
+    <div class="inline-block glass-raised px-8 py-6 rounded-2xl max-w-md mx-auto" style="border-color:rgba(245,200,66,.2)">
+      <div class="text-2xl mb-2">🔒</div>
+      <div class="font-bold text-lg mb-2">全ての口コミを見るには</div>
+      <p class="text-sm text-muted mb-5">自分の年収・口コミを1件投稿すると<br>すべてのデータを<strong class="text-text">1ヶ月間無料で</strong>閲覧できます</p>
+      <button onclick="openModal()" class="btn-orange">口コミを投稿して解放する
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="mt-4 text-xs text-muted">完全無料・匿名・個人情報不要</div>
+    </div>
+  </div>` : '';
+
   feed.innerHTML = reviews.map((r, i) => {
     const color = AIRLINE_COLORS[r.airline] || '#6b7d93';
     const label = AIRLINE_LABELS[r.airline] || r.airline.toUpperCase();
     const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
     const blurStyle = r.locked && !unlocked ? ';filter:blur(5px);user-select:none;pointer-events:none' : '';
 
-    return `<div class="review-card fade-up" style="transition-delay:${Math.min(i,8) * 0.04}s${blurStyle}">
+    const cardHTML = `<div class="review-card fade-up" style="transition-delay:${Math.min(i,8) * 0.04}s${blurStyle}">
       <div class="flex items-center gap-2 flex-wrap mb-3">
         <span style="display:inline-block;padding:3px 10px;border-radius:6px;font-size:.75rem;font-weight:700;background:${color}20;color:${color};border:1px solid ${color}40">${label}</span>
         <span style="font-size:.75rem;padding:3px 8px;border-radius:5px;background:rgba(255,255,255,.06);color:#9ca3af">${posLabel[r.position] || r.position}</span>
@@ -916,10 +916,8 @@ function renderReviews(filter) {
       <div style="font-size:.85rem;font-weight:700;color:${color};margin-bottom:8px">${r.salaryRange} <span style="font-size:.72rem;font-weight:400;color:#6b7d93">年収（概算）</span></div>
       <p style="font-size:.87rem;color:#9daec4;line-height:1.75;margin:0">${r.comment}</p>
     </div>`;
+    return i === 0 ? cardHTML + gateHTML : cardHTML;
   }).join('') || '<p style="color:#6b7d93;font-size:.9rem;padding:20px 0">口コミがまだありません。最初の投稿者になりましょう。</p>';
-
-  // ゲート表示制御
-  document.getElementById('gate-panel').style.display = unlocked ? 'none' : '';
 
   // 新要素をIntersectionObserverに登録
   document.querySelectorAll('.review-card.fade-up:not(.visible)').forEach(el => io.observe(el));
@@ -1161,7 +1159,7 @@ async function submitModal() {
   const goBtn = document.getElementById('btn-go-airline');
   if (goBtn && airlineVal) goBtn.href = `airlines/${airlineVal}.html#reviews`;
   renderReviews(currentFilter);
-  document.getElementById('gate-panel').style.display = 'none';
+  const gp2 = document.getElementById('gate-panel'); if (gp2) gp2.style.display = 'none';
   document.getElementById('unlock-badge').classList.remove('hidden');
 }
 
