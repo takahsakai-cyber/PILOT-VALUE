@@ -127,6 +127,7 @@
     {n:'ニュージーランド航空',   e:'Air New Zealand',             g:'🇳🇿', t:['NZ','ANZ','ニュージーランド'],                        f:'airlines/air-new-zealand.html'},
     {n:'ジェットスター（豪州）', e:'Jetstar Airways',             g:'🇦🇺', t:['JQ','JST','ジェットスター'],                          f:'airlines/jetstar.html'},
   ];
+  window.PV_DB = DB;
 
   /* ── Normalize for matching ── */
   function norm(s) {
