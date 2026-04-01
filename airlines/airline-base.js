@@ -4,6 +4,8 @@
 
 /* Load global search */
 (function(){var s=document.createElement('script');s.src='../search.js';document.head.appendChild(s);})();
+/* Load language toggle */
+(function(){var s=document.createElement('script');s.src='../lang-toggle.js';document.head.appendChild(s);})();
 
 (function(){
 

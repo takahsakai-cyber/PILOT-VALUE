@@ -17,6 +17,9 @@
 <meta name="twitter:title" content="パイロット年収・転職情報｜ANA・JAL・海外117社を比較 | PILOT VALUE"/>
 <meta name="twitter:description" content="パイロット年収・転職情報ならPILOT VALUE。ANA・JAL・Emirates・Qatarなど117社のパイロット年収・口コミを現役パイロットが比較。"/>
 <link rel="canonical" href="https://pilot-value.com/"/>
+<link rel="alternate" hreflang="ja" href="https://pilot-value.com/"/>
+<link rel="alternate" hreflang="en" href="https://pilot-value.com/en/"/>
+<link rel="alternate" hreflang="x-default" href="https://pilot-value.com/"/>
 <script type="application/ld+json">
 [
   {
@@ -461,6 +464,10 @@
     .theme-toggle:hover { background:rgba(255,255,255,.14); }
     [data-theme="light"] .theme-toggle { background:rgba(0,0,0,.06); color:#0f172a; border-color:rgba(0,0,0,.13); }
     [data-theme="light"] .theme-toggle:hover { background:rgba(0,0,0,.11); }
+    .lang-toggle { display:inline-flex; align-items:center; gap:4px; padding:0 10px; height:38px; border-radius:10px; background:rgba(255,255,255,.07); color:#e8edf2; font-size:.75rem; font-weight:700; letter-spacing:.04em; border:1px solid rgba(255,255,255,.12); cursor:pointer; transition:background .2s; flex-shrink:0; white-space:nowrap; }
+    .lang-toggle:hover { background:rgba(255,255,255,.13); }
+    [data-theme="light"] .lang-toggle { background:rgba(0,0,0,.06); color:#0f172a; border-color:rgba(0,0,0,.13); }
+    [data-theme="light"] .lang-toggle:hover { background:rgba(0,0,0,.11); }
 
     /* ── LIGHT MODE ──────────────────────────────────────────────────── */
     [data-theme="light"] body { background-color:#f3f5f8; color:#0f172a; }
@@ -1716,6 +1723,7 @@ applyTheme(localStorage.getItem('pv-theme') || 'dark');
 </script>
 
 <script src="search.js"></script>
+<script src="lang-toggle.js"></script>
 <script>
 /* ── Hero Search Autocomplete ── */
 (function() {
