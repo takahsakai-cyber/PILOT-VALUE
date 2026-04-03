@@ -398,6 +398,7 @@
         '<a href="' + P + 'index.html#ranking" class="pv-nd-link">\u5e74\u53ce\u30e9\u30f3\u30ad\u30f3\u30b0</a>' +
         '<a href="' + P + 'index.html#jobs" class="pv-nd-link">\u6c42\u4eba\u60c5\u5831</a>' +
         '<a href="' + P + 'community.html" class="pv-nd-link">\u30b3\u30df\u30e5\u30cb\u30c6\u30a3</a>' +
+        '<a href="' + P + 'contact.html" class="pv-nd-link" style="color:#3d9bff">\u304a\u554f\u3044\u5408\u308f\u305b</a>' +
       '</div>' +
       '<a href="' + P + 'login.html" class="pv-nd-login" id="pv-nd-login-lnk">\u30ed\u30b0\u30a4\u30f3</a>';
     document.body.appendChild(drawer);
