@@ -1795,7 +1795,7 @@ function updateNavAuth(name) {
     }
   } catch(e) {}
 }
-(function(){try{var u=JSON.parse(localStorage.getItem('pv_user')||'null');if(u&&u.name)updateNavAuth(u.name);}catch(e){}})();
+(function(){try{var u=JSON.parse(localStorage.getItem('pv_user')||'null');if(u&&(u.name||u.email))updateNavAuth(u.name||(u.email||'').split('@')[0]);}catch(e){}})();
 </script>
 
 <script src="search.js"></script>

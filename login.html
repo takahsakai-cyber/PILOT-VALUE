@@ -120,9 +120,12 @@
         return;
       }
 
-      // プロフィール取得
+      // プロフィール取得（プロフィール未作成でも必ずpv_userを保存）
       const { data: profile } = await sb.from('profiles').select('*').eq('id', data.user.id).single();
-      if (profile) localStorage.setItem('pv_user', JSON.stringify({...profile, email: data.user.email}));
+      const userData = profile
+        ? {...profile, email: data.user.email}
+        : { id: data.user.id, email: data.user.email, name: data.user.email.split('@')[0] };
+      localStorage.setItem('pv_user', JSON.stringify(userData));
 
       // 口コミ投稿済み確認 → unlock
       const { data: revs } = await sb.from('reviews').select('id').eq('user_id', data.user.id).limit(1);

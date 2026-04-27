@@ -110,6 +110,14 @@
           口コミ未投稿
         </span>
       </div>
+      <div id="unlock-cta" style="display:none;background:rgba(245,200,66,.06);border:1px solid rgba(245,200,66,.2);border-radius:12px;padding:16px 18px;margin-bottom:20px">
+        <div style="font-size:.85rem;font-weight:700;color:#f5c842;margin-bottom:6px">口コミを投稿して年収データを解放しよう</div>
+        <div style="font-size:.78rem;color:#9ca3af;line-height:1.6;margin-bottom:12px">あなたの実際の年収・待遇を匿名で投稿すると、他のパイロットが投稿した全ての年収口コミが30日間見放題になります。</div>
+        <a href="submit-review.html" style="display:inline-flex;align-items:center;gap:6px;padding:9px 18px;background:#f5c842;color:#000;border-radius:9px;font-size:.82rem;font-weight:700;text-decoration:none">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+          口コミを投稿する
+        </a>
+      </div>
 
       <div id="info-rows">
         <div class="info-row"><div class="info-label">氏名</div><div class="info-value" id="v-name">—</div></div>
@@ -213,6 +221,8 @@
         const unEl = document.getElementById('unlock-status');
         unEl.className = 'unlock-badge unlock-active';
         unEl.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg> 口コミ解放中（${d}まで）`;
+      } else {
+        document.getElementById('unlock-cta').style.display = 'block';
       }
     }
 
