@@ -574,6 +574,7 @@
   gtag('js', new Date());
   gtag('config', 'G-3XYF69VQ3X');
 </script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 <body class="relative">
@@ -1901,6 +1902,27 @@ applyTheme(localStorage.getItem('pv-theme') || 'dark');
   var s = document.createElement('style');
   s.textContent = '#hero-search-dd .pvh-row:last-child{border-bottom:none!important} #hero-search-dd mark{background:rgba(249,115,22,.22);color:#f97316;border-radius:2px;padding:0 1px;font-style:normal}';
   document.head.appendChild(s);
+})();
+</script>
+<script>
+(async function handleOAuthCallback() {
+  try {
+    const SB_URL = 'https://vzgmnkrggrwtsrpqndsm.supabase.co';
+    const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ6Z21ua3JnZ3J3dHNycHFuZHNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MzkwOTcsImV4cCI6MjA5MDAxNTA5N30.wE4cJbqeYGCgn5ZvHd80hYWgQuySKvOMJMbsJWOvmtw';
+    const sb = supabase.createClient(SB_URL, SB_KEY);
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) {
+      const user = session.user;
+      localStorage.setItem('pv_user', JSON.stringify({
+        id: user.id,
+        email: user.email,
+        name: user.user_metadata?.full_name || user.user_metadata?.name || user.email.split('@')[0]
+      }));
+      if (location.search.includes('error') || location.hash.includes('access_token') || location.search.includes('code=')) {
+        location.href = 'profile.html';
+      }
+    }
+  } catch(e) { console.error('OAuth callback error:', e); }
 })();
 </script>
 </body>
