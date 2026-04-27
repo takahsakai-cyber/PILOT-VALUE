@@ -1783,7 +1783,19 @@ document.getElementById('theme-toggle').addEventListener('click', function() {
 });
 applyTheme(localStorage.getItem('pv-theme') || 'dark');
 // Auth button
-(function(){try{var u=JSON.parse(localStorage.getItem('pv_user')||'null');var b=document.getElementById('nav-auth-btn');if(!b)return;if(u&&u.name){b.textContent=u.name.replace(/[\s　].*/,'');b.href='profile.html';b.style.color='#f5c842';b.style.fontWeight='700';}}catch(e){}})();
+function updateNavAuth(name) {
+  try {
+    var b = document.getElementById('nav-auth-btn');
+    if (!b) return;
+    if (name) {
+      b.textContent = name.replace(/[\s　].*/, '');
+      b.href = 'profile.html';
+      b.style.color = '#f5c842';
+      b.style.fontWeight = '700';
+    }
+  } catch(e) {}
+}
+(function(){try{var u=JSON.parse(localStorage.getItem('pv_user')||'null');if(u&&u.name)updateNavAuth(u.name);}catch(e){}})();
 </script>
 
 <script src="search.js"></script>
@@ -1913,12 +1925,12 @@ applyTheme(localStorage.getItem('pv-theme') || 'dark');
     const { data: { session } } = await sb.auth.getSession();
     if (session) {
       const user = session.user;
-      localStorage.setItem('pv_user', JSON.stringify({
-        id: user.id,
-        email: user.email,
-        name: user.user_metadata?.full_name || user.user_metadata?.name || user.email.split('@')[0]
-      }));
-      if (location.search.includes('error') || location.hash.includes('access_token') || location.search.includes('code=')) {
+      const name = user.user_metadata?.full_name || user.user_metadata?.name || user.email.split('@')[0];
+      const userData = { id: user.id, email: user.email, name };
+      localStorage.setItem('pv_user', JSON.stringify(userData));
+      updateNavAuth(name);
+      // OAuthコールバック経由（code=またはerrorパラメータあり）の場合はprofileへ
+      if (location.search.includes('code=') || location.search.includes('error=')) {
         location.href = 'profile.html';
       }
     }
