@@ -240,11 +240,13 @@
       const userId = data.user.id;
       const profileData = { name, gender: gender.value, birthdate: birth, country, company, position: position.value };
 
-      // 3. プロフィールをDBに保存（triggerが作成した行をupdateし、なければupsert）
-      const { error: updateErr } = await sb.from('profiles').update(profileData).eq('id', userId);
-      if(updateErr){
-        // triggerが未設定の場合のフォールバック
-        await sb.from('profiles').upsert({ id: userId, email, ...profileData });
+      // 3. プロフィールをDBに保存
+      const { error: upsertErr } = await sb.from('profiles').upsert({ id: userId, email, ...profileData });
+      if(upsertErr){
+        errEl.textContent = 'プロフィール保存エラー: ' + upsertErr.message;
+        errEl.style.display='block';
+        btn.textContent='登録を完了する'; btn.disabled=false;
+        return;
       }
 
       // 4. localStorageにも保存（ナビ表示用）
